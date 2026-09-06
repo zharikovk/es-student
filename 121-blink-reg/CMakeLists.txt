@@ -5,16 +5,16 @@ set(PICO_PLATFORM rp2040)
 
 include(pico_sdk_import.cmake)
 
-project(121-blink-reg)
+project(121_blink_reg)
 
 pico_sdk_init()
-add_executable(121-blink-reg
+add_executable(121_blink_reg
     ${CMAKE_CURRENT_SOURCE_DIR}/main.c
 )
-target_link_libraries(121-blink-reg
+target_link_libraries(121_blink_reg
     pico_stdlib
 )
-pico_set_linker_script(121-blink-reg
+pico_set_linker_script(121_blink_reg
     ${CMAKE_CURRENT_SOURCE_DIR}/memmap_rp2040.ld
 )
-pico_add_extra_outputs(121-blink-reg)
+pico_add_extra_outputs(121_blink_reg)

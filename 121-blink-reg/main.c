@@ -11,16 +11,15 @@ int main() //inlet)
 {
     // весь дальнейший код пишем здесь
     gpio_init(LED_PIN);//включает вывод
-    gpio_set_dir(LED_PIN,
-                 GPIO_OUT); //`gpio_set_dir` задаёт направление: `GPIO_OUT`
+    gpio_set_dir(LED_PIN, GPIO_OUT); //`gpio_set_dir` задаёт направление: `GPIO_OUT`
                             //означает, что микроконтроллер будет выдавать
                             //напряжение, а не считывать его
 
     volatile uint32_t *gpio_out_set =
     (uint32_t *)(SIO_BASE + SIO_GPIO_OUT_SET_OFFSET);
-volatile uint32_t *gpio_out_clr =
+    volatile uint32_t *gpio_out_clr =
     (uint32_t *)(SIO_BASE + SIO_GPIO_OUT_CLR_OFFSET);
-const uint32_t led_mask = 1u << LED_PIN;
+    const uint32_t led_mask = 1u << LED_PIN;
  
     while (1)
     {
