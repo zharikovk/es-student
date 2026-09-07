@@ -26,7 +26,7 @@ int main() //inlet)
      
     while (1)
 	{
-	    //  bool current = gpio_get(BUTTON_PIN);//это прямой чтение вывода уже ненадо так
+	    
 	    bool current = get_button_debounce(BUTTON_PIN);//Теперь в суперцикле замените прямое чтение вывода вызовом функции. Больше в программе не меняется ничего:
         if (previous == true && current == false)
         {
