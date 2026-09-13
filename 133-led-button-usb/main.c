@@ -1,0 +1,48 @@
+#include "pico/stdlib.h"// добавляем заголовочный файл функций ввода-вывода
+#include "hardware/gpio.h"// добавляем заголовочный файл функций работы с GPIO
+#include <stdio.h>// добавляем заголовочные файлы SDK
+
+const uint LED_PIN = 25; //Светодиод на плате Raspberry Pi Pico подключён к выводу `25`.
+const uint BUTTON_PIN = 15; //// объявляем константу вывода светодиода
+
+const uint DEBOUNCE_MS = 20; /// Заведите константу задержки
+
+bool get_button_debounce(uint pin)//Заведите константу задержки и функцию, которая читает вывод устойчиво
+{
+    bool state = gpio_get(pin);
+    sleep_ms(DEBOUNCE_MS);
+    return state && gpio_get(pin);
+} ///
+void set_led(bool on) //Собрать переключение и вывод в одном месте
+{
+    gpio_put(LED_PIN, on);
+    printf("led %s\n", on ? "on" : "off");
+}
+
+/// 
+int main() //inlet)
+{
+    stdio_init_all();// включаем стандартный ввод-вывод
+    // весь дальнейший код пишем здесь
+    gpio_init(BUTTON_PIN);
+    gpio_set_dir(BUTTON_PIN, GPIO_IN);
+    gpio_pull_up(BUTTON_PIN);
+
+    gpio_init(LED_PIN);// инициализируем пин светодиода
+    gpio_set_dir(LED_PIN, GPIO_OUT); // Настраиваем пин на ВЫХОД
+    bool led = false;//переменные - помнит светит ли светодиод
+    bool previous = false;// перемеенные - что показывает вывод на прошлом шаге
+     
+    while (1)
+	{
+	    
+	    bool current = get_button_debounce(BUTTON_PIN);//Теперь в суперцикле замените прямое чтение вывода вызовом функции. Больше в программе не меняется ничего:
+        if (previous == true && current == false)
+        {// если состояние сменилось — переключаем светодиод вызовом set_led
+            led = !led;
+            set_led(led);//gpio_put(LED_PIN, led);
+        }
+
+        previous = current;// запоминаем текущее состояние пина кнопки, как предыдущее
+    }
+}
