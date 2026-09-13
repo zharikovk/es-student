@@ -19,29 +19,6 @@ void set_led(bool on) //Собрать переключение и вывод в
     printf("led %s\n", on ? "on" : "off");
 }
 
-
-//Функция получает пришедший символ и текущее состояние светодиода, а возвращает новое.
-bool handle_command(int command, bool led)
-{
-    if (command == 'e')
-    {
-        led = true;
-        set_led(led);
-    }
-    else if (command == 'd')
-    {
-        led = false;
-        set_led(led);
-    }
-    else
-    {
-        printf("unknown command: %c\n", command);
-    }
-
-    return led;
-}
-///
-
 /// 
 int main() //inlet)
 {
@@ -65,14 +42,7 @@ int main() //inlet)
             led = !led;
             set_led(led);//gpio_put(LED_PIN, led);
         }
+
         previous = current;// запоминаем текущее состояние пина кнопки, как предыдущее
-        	    
-	    int command = getchar_timeout_us(0); //Прочитать символ, не останавливая суперцикл
-	        
-	    if (command == PICO_ERROR_TIMEOUT)
-        {
-            continue;
-        }
-        led = handle_command(command, led);
     }
 }
