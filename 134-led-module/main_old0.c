@@ -3,7 +3,6 @@
 #include <stdio.h>// добавляем заголовочные файлы SDK
 #include "led.h" // модуль Светодиод
 #include "log.h" // модуль журнала
-#include "device.h" // модуль железа
 
 const uint BUTTON_PIN = 15; //// объявляем константу вывода светодиода
 
@@ -32,10 +31,6 @@ void handle_command(int command)
     else if (command == 'v')//тут понятно вывод версии
     {
         log_version();
-    }
-    else if (command == 'i')//тут понятно вывод железа
-    {
-        device_info();
     }
     else
     {
