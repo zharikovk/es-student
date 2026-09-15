@@ -2,7 +2,6 @@
 #include "hardware/gpio.h"// добавляем заголовочный файл функций работы с GPIO
 #include <stdio.h>// добавляем заголовочные файлы SDK
 #include "led.h" // модуль Светодиод
-#include "log.h" // модуль журнала
 
 const uint BUTTON_PIN = 15; //// объявляем константу вывода светодиода
 
@@ -21,20 +20,16 @@ void handle_command(int command)
     if (command == 'e')
     {
         led_set(true);
-        LOG_INF("led %s\n", led_is_on() ? "on" : "off");
+        printf("led %s\n", led_is_on() ? "on" : "off");
     }
     else if (command == 'd')
     {
         led_set(false);
-        LOG_INF("led %s\n", led_is_on() ? "on" : "off");
-    }
-    else if (command == 'v')//тут понятно вывод версии
-    {
-        log_version();
+        printf("led %s\n", led_is_on() ? "on" : "off");
     }
     else
     {
-        LOG_ERR("unknown command: %c\n", command);
+        printf("unknown command: %c\n", command);
     }
 }
 ///
@@ -61,17 +56,16 @@ int main() //inlet)
         if (previous == true && current == false)
         {// если состояние сменилось — переключаем светодиод вызовом set_led
             led_toggle();
-            LOG_INF("led %s\n", led_is_on() ? "on" : "off");
+            printf("led %s\n", led_is_on() ? "on" : "off");
         }
         previous = current;// запоминаем текущее состояние пина кнопки, как предыдущее
         	    
 	    int command = getchar_timeout_us(0); //Прочитать символ, не останавливая суперцикл
-	    
+	        
 	    if (command == PICO_ERROR_TIMEOUT)
         {
             continue;
         }
-        LOG_DBG("got %c\n", command);    
         handle_command(command);
     }
 }
