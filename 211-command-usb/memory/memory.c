@@ -89,5 +89,5 @@ void mem_info(void)
                         ((uintptr_t)&__StackTop - (uintptr_t)&__StackBottom);
     unsigned stack = ((uintptr_t)&__StackTop - (uintptr_t)&__StackBottom); 
     unsigned heap = ((uintptr_t)&__HeapLimit - (uintptr_t)&__bss_end__);              
-    printf("  ram free    %8u bytes = %8u for heap and  %8u for stack\n", free_ram, heap, stack);
+    printf("  ram free     %8u for heap and  %8u for stack\n", heap, stack);
 }
