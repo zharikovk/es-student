@@ -72,17 +72,17 @@ void mem_info(void)
     unsigned data_sz    = (uintptr_t)&__data_end__ - (uintptr_t)&__data_start__;
 
     // итог: образ во флеш и из чего он сложился
-    printf("  flash image: %8u = boot2 %6u + text %6u + data %6u bytes\n",
+    printf("  flash image %8u = boot2 %6u + text %6u + data %6u\n",
            image_size, boot2_size, text_size, data_sz);
 
     // итог: свободно во флеш-памяти из всего её объёма
     unsigned free_flash = PICO_FLASH_SIZE_BYTES - image_size;
-    printf("  free flash:  %8u bytes of %8u bytes\n", free_flash, PICO_FLASH_SIZE_BYTES);
+    printf("  flash free  %8u of %8u\n", free_flash, PICO_FLASH_SIZE_BYTES);
 
     // итог: занято в ОЗУ — .data и .bss
     unsigned bss_size = (uintptr_t)&__bss_end__ - (uintptr_t)&__bss_start__;
     unsigned used_ram = data_sz + bss_size;
-    printf("  ram used: %8u bytes =(.data %8u + .bss %8u)\n", used_ram, data_sz,bss_size);
+    printf("  ram used %8u = data %8u + bss %8u\n", used_ram, data_sz,bss_size);
 
     // итог: свободно в ОЗУ — под кучу и под стек
     unsigned free_ram = ((uintptr_t)&__HeapLimit - (uintptr_t)&__bss_end__) +
