@@ -87,6 +87,7 @@ void mem_info(void)
     // итог: свободно в ОЗУ — под кучу и под стек
     unsigned free_ram = ((uintptr_t)&__HeapLimit - (uintptr_t)&__bss_end__) +
                         ((uintptr_t)&__StackTop - (uintptr_t)&__StackBottom);
-    unsigned stack = ((uintptr_t)&__StackTop - (uintptr_t)&__StackBottom);               
-    printf("  ram free    %8u bytes for heap and  %8u for stack\n", free_ram, stack);
+    unsigned stack = ((uintptr_t)&__StackTop - (uintptr_t)&__StackBottom); 
+    unsigned heap = ((uintptr_t)&__HeapLimit - (uintptr_t)&__bss_end__);              
+    printf("  ram free    %8u bytes = %8u for heap and  %8u for stack\n", free_ram, heap, stack);
 }
