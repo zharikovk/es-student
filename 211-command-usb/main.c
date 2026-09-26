@@ -5,6 +5,7 @@
 #include "led.h" // модуль Светодиод
 #include "log.h" // модуль журнала
 #include "device.h" // модуль железа
+#include "memory.h"
 
 #define LINE_SIZE 32//буфер и его текущую длин
 #define COMMAND_COUNT (sizeof(commands) / sizeof(commands[0]))
@@ -49,6 +50,11 @@ void cmd_ping(void)
     printf("pong\n");
 }
 
+void cmd_mem_info(void)
+{
+    mem_info();
+}
+
 struct command_t
 {
     const char *name;
@@ -61,6 +67,7 @@ const struct command_t commands[] = {
     { "info", cmd_info },
     { "version", cmd_version },
     { "ping", cmd_ping },
+    { "mem_info", cmd_mem_info }
 };
 
 void handle_command(const char *command)
