@@ -2,9 +2,13 @@
 
 #include <stdio.h>
 #include <stdint.h>
+#include <stdlib.h>
 #include "pico/stdlib.h"//даёт функцию чтения серийного номера
 #include "hardware/regs/addressmap.h"//базовый адрес `SYSINFO_BASE
 #include "memory.h"
+#include "command.h"
+#include "device.h"
+
 
 extern char __flash_binary_start;
 extern char __flash_binary_end;
@@ -19,7 +23,8 @@ extern char __HeapLimit;
 extern char __StackBottom;
 extern char __StackTop;
 
-
+uint32_t data_variable = 100;
+uint32_t bss_variable;
 
 static void row(const char *name, uintptr_t start, uintptr_t end)
 {
@@ -90,4 +95,38 @@ void mem_info(void)
     unsigned stack = ((uintptr_t)&__StackTop - (uintptr_t)&__StackBottom); 
     unsigned heap = ((uintptr_t)&__HeapLimit - (uintptr_t)&__bss_end__);              
     printf("  ram free     %8u for heap and  %8u for stack\n", heap, stack);
+}
+
+int main(void);
+void fw_info(void)
+{
+    // считаем вызов: data_variable и bss_variable на единицу больше
+    data_variable++;
+    bss_variable++;
+    // адреса функций со сброшенным признаком Thumb
+    uint16_t *main_code = (uint16_t *)((uintptr_t)main & ~1u);
+	uint16_t *fw_info_code = (uint16_t *)((uintptr_t)fw_info & ~1u);
+	
+	printf("object          address    value\n");
+	printf("main            %p 0x%04x\n", main, *main_code);
+    printf("fw_info         %p 0x%04x\n", fw_info, *fw_info_code);
+    printf("commands        %p\n", commands);
+    for (uint i = 0; i < command_count; i++) {
+        printf("- %-12s  %p\n", commands[i].name, commands[i].handler);
+    }
+    printf("DEVICE_PROJECT    %p %s\n", DEVICE_PROJECT,    DEVICE_PROJECT);
+    printf("DEVICE_BOARD      %p %s\n", DEVICE_BOARD, DEVICE_BOARD);
+    // ^^^ имена макросов подставьте свои — те, что в device.h
+    // Печатаем адрес и значение наших переменных
+    printf("data_variable:  %p %u\n", &data_variable, (unsigned)data_variable);
+    printf("bss_variable:   %p %u\n", &bss_variable,  (unsigned)bss_variable);
+	uint32_t stack_variable = 1946;
+    uint32_t *heap_variable = malloc(sizeof(uint32_t));
+    printf("stack_variable:  %p %u\n", &stack_variable, (unsigned)stack_variable);
+    printf("heap_variable:   %p %u\n", heap_variable,  (unsigned)*heap_variable);
+    if (heap_variable != NULL)
+    {
+        *heap_variable = 1951;
+    }
+    free(heap_variable);
 }

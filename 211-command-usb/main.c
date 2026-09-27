@@ -6,6 +6,7 @@
 #include "log.h" // модуль журнала
 #include "device.h" // модуль железа
 #include "memory.h"
+#include "command.h"
 
 #define LINE_SIZE 32//буфер и его текущую длин
 #define COMMAND_COUNT (sizeof(commands) / sizeof(commands[0]))
@@ -14,7 +15,7 @@
 char line[LINE_SIZE];//буфер и его текущую длин
 uint line_length = 0;//буфер и его текущую длин
 
-typedef void (*command_handler_t)(void);//1. Описать тип обработчика массив
+//typedef void (*command_handler_t)(void);//1. Описать тип обработчика массив
 
 const uint BUTTON_PIN = 15; //// объявляем константу вывода светодиода
 const uint DEBOUNCE_MS = 20; /// Заведите константу задержки
@@ -55,11 +56,11 @@ void cmd_mem_info(void)
     mem_info();
 }
 
-struct command_t
-{
-    const char *name;
-    command_handler_t handler;
-};
+//struct command_t
+//{
+//    const char *name;
+//    command_handler_t handler;
+//};
 
 const struct command_t commands[] = {
     { "enable", cmd_enable },
@@ -67,12 +68,15 @@ const struct command_t commands[] = {
     { "info", cmd_info },
     { "version", cmd_version },
     { "ping", cmd_ping },
-    { "mem_info", cmd_mem_info }
+    { "mem_info", cmd_mem_info },
+    { "fw_info", fw_info }
+    
 };
+const uint command_count = sizeof(commands) / sizeof(commands[0]);
 
 void handle_command(const char *command)
 {
-    for (uint i = 0; i < COMMAND_COUNT; i++)
+    for (uint i = 0; i < command_count; i++)
     {
         if (strcmp(command, commands[i].name) == 0)
         {

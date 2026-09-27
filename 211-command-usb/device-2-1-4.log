@@ -1,0 +1,67 @@
+задание: 2.1.4
+проект: 211-command-usb
+устройство: 2e8a:000a
+серийный номер: 5054316550735B9C
+порт: /dev/ttyACM0
+начало: 2026-09-27T23:41:55
+   0.000 --> fw_info
+   0.147 <-- fw_info
+   0.148 <-- dbg read_line:112 got fw_info
+   0.149 <-- object          address    value
+   0.150 <-- main            10000321 0xb5f0
+   0.150 <-- fw_info         1000069D 0x4b31
+   0.151 <-- commands        10007518
+   0.151 <-- - enable        10000281
+   0.152 <-- - disable       100002BD
+   0.152 <-- - info          10000301
+   0.153 <-- - version       100002F9
+   0.153 <-- - ping          10000309
+   0.154 <-- - mem_info      10000319
+   0.154 <-- - fw_info       1000069D
+   0.155 <-- DEVICE_PROJECT    100075B8 211-command-usb
+   0.156 <-- DEVICE_BOARD      1000760C pico
+   0.157 <-- data_variable:  20000F58 101
+   0.157 <-- bss_variable:   2000200C 1
+   0.158 <-- stack_variable:  20041F84 1946
+   0.158 <-- heap_variable:   20002508 1178071373
+   2.162 --> fw_info
+   2.310 <-- fw_info
+   2.311 <-- dbg read_line:112 got fw_info
+   2.311 <-- object          address    value
+   2.312 <-- main            10000321 0xb5f0
+   2.313 <-- fw_info         1000069D 0x4b31
+   2.313 <-- commands        10007518
+   2.314 <-- - enable        10000281
+   2.314 <-- - disable       100002BD
+   2.315 <-- - info          10000301
+   2.315 <-- - version       100002F9
+   2.315 <-- - ping          10000309
+   2.315 <-- - mem_info      10000319
+   2.315 <-- - fw_info       1000069D
+   2.316 <-- DEVICE_PROJECT    100075B8 211-command-usb
+   2.316 <-- DEVICE_BOARD      1000760C pico
+   2.316 <-- data_variable:  20000F58 102
+   2.317 <-- bss_variable:   2000200C 2
+   2.317 <-- stack_variable:  20041F84 1946
+   2.317 <-- heap_variable:   20002508 1178071373
+   4.321 --> fw_info
+   4.472 <-- fw_info
+   4.473 <-- dbg read_line:112 got fw_info
+   4.473 <-- object          address    value
+   4.474 <-- main            10000321 0xb5f0
+   4.475 <-- fw_info         1000069D 0x4b31
+   4.475 <-- commands        10007518
+   4.476 <-- - enable        10000281
+   4.476 <-- - disable       100002BD
+   4.477 <-- - info          10000301
+   4.477 <-- - version       100002F9
+   4.477 <-- - ping          10000309
+   4.477 <-- - mem_info      10000319
+   4.478 <-- - fw_info       1000069D
+   4.478 <-- DEVICE_PROJECT    100075B8 211-command-usb
+   4.478 <-- DEVICE_BOARD      1000760C pico
+   4.478 <-- data_variable:  20000F58 103
+   4.479 <-- bss_variable:   2000200C 3
+   4.479 <-- stack_variable:  20041F84 1946
+   4.479 <-- heap_variable:   20002508 1178071373
+итог: отправлено команд 3, принято строк 57
