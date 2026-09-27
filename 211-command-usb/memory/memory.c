@@ -114,16 +114,16 @@ void fw_info(void)
     for (uint i = 0; i < command_count; i++) {
         printf("- %-12s  %p\n", commands[i].name, commands[i].handler);
     }
-    printf("DEVICE_PROJECT    %p %s\n", DEVICE_PROJECT,    DEVICE_PROJECT);
-    printf("DEVICE_BOARD      %p %s\n", DEVICE_BOARD, DEVICE_BOARD);
+    printf("DEVICE_PROJECT  %p %s\n", DEVICE_PROJECT,    DEVICE_PROJECT);
+    printf("DEVICE_BOARD    %p %s\n", DEVICE_BOARD, DEVICE_BOARD);
     // ^^^ имена макросов подставьте свои — те, что в device.h
     // Печатаем адрес и значение наших переменных
-    printf("data_variable:  %p %u\n", &data_variable, (unsigned)data_variable);
-    printf("bss_variable:   %p %u\n", &bss_variable,  (unsigned)bss_variable);
+    printf("data_variable   %p %u\n", &data_variable, (unsigned)data_variable);
+    printf("bss_variable    %p %u\n", &bss_variable,  (unsigned)bss_variable);
 	uint32_t stack_variable = 1946;
     uint32_t *heap_variable = malloc(sizeof(uint32_t));
-    printf("stack_variable:  %p %u\n", &stack_variable, (unsigned)stack_variable);
-    printf("heap_variable:   %p %u\n", heap_variable,  (unsigned)*heap_variable);
+    printf("stack_variable  %p %u\n", &stack_variable, (unsigned)stack_variable);
+    printf("heap_variable   %p %u\n", heap_variable,  (unsigned)*heap_variable);
     if (heap_variable != NULL)
     {
         *heap_variable = 1951;

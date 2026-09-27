@@ -9,7 +9,7 @@
 #include "command.h"
 
 #define LINE_SIZE 32//буфер и его текущую длин
-#define COMMAND_COUNT (sizeof(commands) / sizeof(commands[0]))
+
 
 
 char line[LINE_SIZE];//буфер и его текущую длин
@@ -55,12 +55,6 @@ void cmd_mem_info(void)
 {
     mem_info();
 }
-
-//struct command_t
-//{
-//    const char *name;
-//    command_handler_t handler;
-//};
 
 const struct command_t commands[] = {
     { "enable", cmd_enable },
