@@ -108,25 +108,26 @@ void fw_info(void)
 	uint16_t *fw_info_code = (uint16_t *)((uintptr_t)fw_info & ~1u);
 	
 	printf("object          address    value\n");
-	printf("main            %p 0x%04x\n", main, *main_code);
-    printf("fw_info         %p 0x%04x\n", fw_info, *fw_info_code);
-    printf("commands        %p\n", commands);
+    printf("main            0x%08x 0x%04x\n", (uintptr_t)main, *main_code);
+    printf("fw_info         0x%08x 0x%04x\n", (uintptr_t)fw_info, *fw_info_code);
+    printf("commands        0x%08x\n", (uintptr_t)commands);
     for (uint i = 0; i < command_count; i++) {
-        printf("- %-12s  %p\n", commands[i].name, commands[i].handler);
+        printf("- %-12s  0x%08x\n", commands[i].name, (uintptr_t)commands[i].handler);
     }
-    printf("DEVICE_PROJECT  %p %s\n", DEVICE_PROJECT,    DEVICE_PROJECT);
-    printf("DEVICE_BOARD    %p %s\n", DEVICE_BOARD, DEVICE_BOARD);
+    printf("DEVICE_PROJECT  0x%08x %s\n", (uintptr_t)DEVICE_PROJECT, DEVICE_PROJECT);
+    printf("DEVICE_BOARD    0x%08x %s\n", (uintptr_t)DEVICE_BOARD, DEVICE_BOARD);
     // ^^^ имена макросов подставьте свои — те, что в device.h
     // Печатаем адрес и значение наших переменных
-    printf("data_variable   %p %u\n", &data_variable, (unsigned)data_variable);
-    printf("bss_variable    %p %u\n", &bss_variable,  (unsigned)bss_variable);
+    printf("data_variable   0x%08x %u\n", (uintptr_t)&data_variable, (unsigned)data_variable);
+    printf("bss_variable    0x%08x %u\n", (uintptr_t)&bss_variable, (unsigned)bss_variable);
 	uint32_t stack_variable = 1946;
     uint32_t *heap_variable = malloc(sizeof(uint32_t));
-    printf("stack_variable  %p %u\n", &stack_variable, (unsigned)stack_variable);
-    printf("heap_variable   %p %u\n", heap_variable,  (unsigned)*heap_variable);
+
     if (heap_variable != NULL)
     {
         *heap_variable = 1951;
+        printf("stack_variable  0x%08x %u\n", (uintptr_t)&stack_variable, (unsigned)stack_variable);
+    	printf("heap_variable   0x%08x %u\n", (uintptr_t)heap_variable, (unsigned)*heap_variable);
     }
     free(heap_variable);
 }
