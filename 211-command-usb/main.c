@@ -63,8 +63,8 @@ const struct command_t commands[] = {
     { "version", cmd_version },
     { "ping", cmd_ping },
     { "mem_info", cmd_mem_info },
-    { "fw_info", fw_info }
-    
+    { "fw_info", fw_info },
+    { "dev_info", dev_info}
 };
 const uint command_count = sizeof(commands) / sizeof(commands[0]);
 

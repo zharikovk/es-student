@@ -1,5 +1,5 @@
-# Проверка задания п2.1.4 на устройстве: трижды подряд спрашивает у платы адреса прошивки командой fw_info
-# и записывает обмен в файл device-2-1-4.log.
+# Проверка задания п2.1.5 на устройстве: спрашивает у платы раскладку структуры командой dev_info
+# и записывает обмен в файл device-2-1-5.log.
 
 import time
 from datetime import datetime
@@ -10,10 +10,10 @@ from serial.tools import list_ports
 VENDOR_ID = 0x2E8A
 PRODUCT_ID = 0x000A
 
-TASK = "2.1.4"
+TASK = "2.1.5"
 PROJECT = "211-command-usb"
-LOG_NAME = "device-2-1-4.log"
-COMMANDS = ["fw_info", "fw_info", "fw_info"]
+LOG_NAME = "device-2-1-5.log"
+COMMANDS = ["dev_info"]
 ANSWER_S = 2
 
 
