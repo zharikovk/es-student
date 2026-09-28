@@ -41,12 +41,7 @@ void dev_info(void)
            (uintptr_t)&device_card, 
            (unsigned)sizeof(device_card));
 
-    printf("- %-13s 0x%08x %5u %6u %u\n",
-           "revision",
-           &device_card.revision,
-           sizeof(device_card.revision),
-           offsetof(struct info_t, revision),
-           device_card.revision);
+    
 
     printf("- %-13s 0x%08x %5u %6u 0x%08x\n",
            "version",
@@ -61,6 +56,12 @@ void dev_info(void)
            sizeof(device_card.name),
            offsetof(struct info_t, name),
            device_card.name);
+    printf("- %-13s 0x%08x %5u %6u %u\n",
+           "revision",
+           &device_card.revision,
+           sizeof(device_card.revision),
+           offsetof(struct info_t, revision),
+           device_card.revision);
     unsigned fields = sizeof(device_card.revision) + 
                       sizeof(device_card.version) + 
                       sizeof(device_card.name);
