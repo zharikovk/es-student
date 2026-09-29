@@ -8,7 +8,11 @@
 #include "memory.h"
 #include "command.h"
 #include "device.h"
+#include "hardware/gpio.h" 
+#include "led.h" 
 
+#define VECTOR_TABLE 0x10000100
+#define SIO_TABLE 0xd0000004
 
 extern char __flash_binary_start;
 extern char __flash_binary_end;
@@ -116,8 +120,8 @@ void fw_info(void)
     }
     printf("DEVICE_PROJECT  0x%08x %s\n", (uintptr_t)DEVICE_PROJECT, DEVICE_PROJECT);
     printf("DEVICE_BOARD    0x%08x %s\n", (uintptr_t)DEVICE_BOARD, DEVICE_BOARD);
-    // ^^^ имена макросов подставьте свои — те, что в device.h
-    // Печатаем адрес и значение наших переменных
+
+
     printf("data_variable   0x%08x %u\n", (uintptr_t)&data_variable, (unsigned)data_variable);
     printf("bss_variable    0x%08x %u\n", (uintptr_t)&bss_variable, (unsigned)bss_variable);
 	uint32_t stack_variable = 1946;
@@ -131,3 +135,26 @@ void fw_info(void)
     }
     free(heap_variable);
 }
+
+void boot_info(void)
+{
+    const uint32_t *vectors = (const uint32_t *)VECTOR_TABLE;
+
+    uint32_t stack_top = vectors[0];
+    uint32_t reset_handler = vectors[1];
+
+    uint32_t reset_even = reset_handler & ~1u;
+    volatile uint32_t *gpio_in = (volatile uint32_t *)SIO_TABLE;
+    uint32_t led_bit = (*gpio_in >> led_pin()) & 1u;
+        // адреса функций со сброшенным признаком Thumb
+    uint32_t gpio_get_val = gpio_get(led_pin()) ? 1 : 0;
+    printf("vector table   0x%08x\n", VECTOR_TABLE);
+    printf("  stack top    0x%08x\n", stack_top);
+    printf("  reset        0x%08x\n", reset_handler);
+    printf("  reset (even) 0x%08x\n", reset_even);
+    
+    printf("gpio in        0x%08x\n", SIO_TABLE);
+    printf("  led bit      %u\n", led_bit);
+    printf("  gpio_get     %u\n", gpio_get_val);
+}
+

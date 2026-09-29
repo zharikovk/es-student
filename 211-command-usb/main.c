@@ -11,7 +11,7 @@
 #define LINE_SIZE 32//буфер и его текущую длин
 
 
-
+extern void boot_info(void);
 char line[LINE_SIZE];//буфер и его текущую длин
 uint line_length = 0;//буфер и его текущую длин
 
@@ -64,7 +64,8 @@ const struct command_t commands[] = {
     { "ping", cmd_ping },
     { "mem_info", cmd_mem_info },
     { "fw_info", fw_info },
-    { "dev_info", dev_info}
+    { "dev_info", dev_info},
+    { "boot_info", boot_info}
 };
 const uint command_count = sizeof(commands) / sizeof(commands[0]);
 

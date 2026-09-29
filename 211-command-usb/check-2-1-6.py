@@ -1,5 +1,5 @@
-# Проверка задания п2.1.5 на устройстве: спрашивает у платы раскладку структуры командой dev_info
-# и записывает обмен в файл device-2-1-5.log.
+# Проверка задания п2.1.6 на устройстве: читает таблицу векторов и регистр GPIO при разном состоянии светодиода
+# и записывает обмен в файл device-2-1-6.log.
 
 import time
 from datetime import datetime
@@ -10,10 +10,10 @@ from serial.tools import list_ports
 VENDOR_ID = 0x2E8A
 PRODUCT_ID = 0x000A
 
-TASK = "2.1.5"
+TASK = "2.1.6"
 PROJECT = "211-command-usb"
-LOG_NAME = "device-2-1-5.log"
-COMMANDS = ["dev_info"]
+LOG_NAME = "device-2-1-6.log"
+COMMANDS = ["boot_info", "enable", "boot_info", "disable", "boot_info"]
 ANSWER_S = 2
 
 
