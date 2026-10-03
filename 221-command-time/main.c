@@ -55,6 +55,8 @@ void main_time_reset(void)
 	profiling_reset_max();
 	printf("max reset\n");
 }
+
+
 ////////////////////////////////////////////
 ////по команде calc_pi прибор считает число π рядом Лейбница////
 // прикидка: за член ряда 4 операции с double, 175 + 110 + 190 + 110 = 585 тактов;
@@ -102,7 +104,9 @@ const struct command_t commands[] = {
     { "uptime", cmd_uptime},
     { "calc_pi", cmd_calc_pi },
     { "main_time_reset", main_time_reset }, 
-    { "main_time_exec", main_time_exec } 
+    { "main_time_exec", main_time_exec },
+    { "clk_sys_low", clk_sys_low }, 
+    { "clk_sys_default", clk_sys_default } 
 };
 const uint command_count = sizeof(commands) / sizeof(commands[0]);
 
