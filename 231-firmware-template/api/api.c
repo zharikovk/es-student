@@ -10,16 +10,16 @@
 #include <errno.h>
 #include <stdlib.h>
 
-// тип функции-обработчика команды
-typedef void (*cmd_handler_t)(const command_t *command);
-
+// обработчик команды: получает имя и аргументы
+typedef void (*api_callback_t)(const command_t *command);
 // Структура одной строки в таблице команд
-typedef struct 
+// команда прибора: имя, справка для help и обработчик
+typedef struct
 {
     const char *name;
-    cmd_handler_t handler;
-    const char *help_text;
-} command_entry_t;
+    const char *help;
+    api_callback_t callback;
+} api_command_t;
 
 static void cmd_info(const command_t *command) 
 {
@@ -128,16 +128,16 @@ static void cmd_calc_pi(const command_t *command)
 static void cmd_help(const command_t *command) 
 {
 
-    extern const command_entry_t command_table[];
+    extern const api_command_t command_table[];
     extern const int command_table_size;
     
     for (uint32_t i = 0; i < command_table_size; i++) 
     {
-        printf("  %-15s %s\r\n", command_table[i].name, command_table[i].help_text);
+        printf("  %-15s %s\r\n", command_table[i].name, command_table[i].help);
     }
 }
 
-const command_entry_t command_table[] = 
+const api_command_t command_table[] = 
 {
     {"help",  cmd_help,  "list of commands"},
     {"info",  cmd_info,  "device passport"},
@@ -173,7 +173,7 @@ void api_handle(const command_t *command)
     {
         if (strcmp(command->name, command_table[i].name) == 0) 
         {
-            command_table[i].handler(command);
+            command_table[i].callback(command);
             return;
         }
     }
