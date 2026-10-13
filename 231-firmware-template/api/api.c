@@ -9,6 +9,7 @@
 #include <ctype.h>
 #include <errno.h>
 #include <stdlib.h>
+#include "led-task.h"
 
 // обработчик команды: получает имя и аргументы
 typedef void (*api_callback_t)(const command_t *command);
@@ -17,8 +18,8 @@ typedef void (*api_callback_t)(const command_t *command);
 typedef struct
 {
     const char *name;
-    const char *help;
     api_callback_t callback;
+    const char *help;
 } api_command_t;
 
 static void cmd_info(const command_t *command) 
@@ -137,6 +138,47 @@ static void cmd_help(const command_t *command)
     }
 }
 
+static void cmd_led_enable(const command_t *command)
+{
+	led_task_set_state(LED_STATE_ON);
+    printf("led: on, period %lu ms\r\n", (unsigned)led_task_get_period_ms());
+}
+
+static void cmd_led_disable(const command_t *command) 
+{
+    led_task_set_state(LED_STATE_OFF);
+    printf("led: off, period %lu ms\r\n", (unsigned)led_task_get_period_ms());
+}
+
+static void cmd_led_blink(const command_t *command) 
+{
+    led_task_set_state(LED_STATE_BLINK);
+    printf("led: blink, period %lu ms\r\n", (unsigned)led_task_get_period_ms());
+}
+
+///////////////////////////
+static void cmd_led_period(const command_t *command)
+{
+    uint32_t period_ms;
+
+    if (command->argc != 1 || !parse_u32(command->argv[0], &period_ms))
+    {
+        printf("error: usage led_period <period_ms>\n");
+        return;
+    }
+
+    // годится ли такой период, решает задача светодиода
+    if (!led_task_set_period_ms(period_ms))
+    {
+        printf("error: period_ms must be greater than 0\n");
+        return;
+    }
+
+    // ответ: состояние и период светодиода
+    printf("led: period %lu ms\n", (unsigned)period_ms);
+}
+//////////////////////////
+
 const api_command_t command_table[] = 
 {
     {"help",  cmd_help,  "list of commands"},
@@ -145,7 +187,10 @@ const api_command_t command_table[] =
 	{"calc_pi", cmd_calc_pi, "calculate pi: calc_pi [terms]"},
 	{"main_time_exec", main_time_exec, "superloop iteration: average and maximum"},
 	{"main_time_reset", main_time_reset, "reset maximum iteration"},
-    
+    {"led_enable",  cmd_led_enable,  "turn LED on"},
+    {"led_disable",  cmd_led_disable,  "turn LED off"},
+    {"led_blink",  cmd_led_blink,  "start LED blinkin"},
+    {"led_period",  cmd_led_period,  "set blink period in ms: led_period <ms>"}
 };
 
 const int command_table_size = sizeof(command_table) / sizeof(command_table[0]);

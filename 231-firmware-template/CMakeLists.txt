@@ -10,7 +10,7 @@ project(231_firmware_template)
 pico_sdk_init()
 add_executable(${PROJECT_NAME}
     ${CMAKE_CURRENT_SOURCE_DIR}/main.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/led/led.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/led-task/led-task.c
     ${CMAKE_CURRENT_SOURCE_DIR}/logging/log.c
     ${CMAKE_CURRENT_SOURCE_DIR}/device/device.c
     ${CMAKE_CURRENT_SOURCE_DIR}/stdio-text-protocol/stdio-text-protocol.c
@@ -25,7 +25,7 @@ target_compile_definitions(${PROJECT_NAME} PRIVATE
     DEVICE_BOARD="${PICO_BOARD}"
 )
 target_include_directories(${PROJECT_NAME} PRIVATE
-    ${CMAKE_CURRENT_SOURCE_DIR}/led
+    ${CMAKE_CURRENT_SOURCE_DIR}/led-task
     ${CMAKE_CURRENT_SOURCE_DIR}/logging
     ${CMAKE_CURRENT_SOURCE_DIR}/device
     ${CMAKE_CURRENT_SOURCE_DIR}/stdio-text-protocol
