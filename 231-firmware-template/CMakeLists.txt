@@ -8,6 +8,7 @@ include(pico_sdk_import.cmake)
 project(231_firmware_template)
 
 pico_sdk_init()
+add_compile_options(-Wall)
 add_executable(${PROJECT_NAME}
     ${CMAKE_CURRENT_SOURCE_DIR}/main.c
     ${CMAKE_CURRENT_SOURCE_DIR}/led-task/led-task.c
