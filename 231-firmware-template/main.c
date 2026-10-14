@@ -7,7 +7,7 @@
 #include "stdio-text-protocol.h"
 #include "profiling.h"
 #include "led-task.h"
-
+#include "button-task.h"
 
 int main() //inlet)
 {
@@ -16,11 +16,13 @@ int main() //inlet)
     // весь дальнейший код пишем здесь
     led_task_init();
     profiling_init(); // запоминаем начальное показание часов для профилирования
+    button_task_init();
     
     while (1)
 	{
 	    profiling_iteration();// учитываем прошлую итерацию
 	    led_task_handle();// мигаем светодиодом
+        button_task_handle();
         
         const command_t *command = stdio_text_protocol_handle();
         if (command != NULL) {

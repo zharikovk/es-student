@@ -10,6 +10,7 @@
 #include <errno.h>
 #include <stdlib.h>
 #include "led-task.h"
+#include "button-task.h"
 
 // обработчик команды: получает имя и аргументы
 typedef void (*api_callback_t)(const command_t *command);
@@ -178,7 +179,25 @@ static void cmd_led_period(const command_t *command)
     printf("led: period %lu ms\n", (unsigned)period_ms);
 }
 //////////////////////////
+static void cmd_button(const command_t *command) 
+{
+    bool pressed = button_task_is_pressed();
+    uint32_t count = button_task_get_press_count();
+    
+    if (pressed) 
+    {
+        printf("button: pressed, presses %lu\n", (unsigned)count);
+    } else 
+    {
+        printf("button: released, presses %lu\n", (unsigned)count);
+    }
+}
 
+///////////////////////////
+/////////////////////////
+///////////// /////////////
+////////// ///////////////
+/////// /////////////////
 const api_command_t command_table[] = 
 {
     {"help",  cmd_help,  "list of commands"},
@@ -190,7 +209,8 @@ const api_command_t command_table[] =
     {"led_enable",  cmd_led_enable,  "turn LED on"},
     {"led_disable",  cmd_led_disable,  "turn LED off"},
     {"led_blink",  cmd_led_blink,  "start LED blinkin"},
-    {"led_period",  cmd_led_period,  "set blink period in ms: led_period <ms>"}
+    {"led_period",  cmd_led_period,  "set blink period in ms: led_period <ms>"},
+    {"button",  cmd_button,  "show button state and press count"},
 };
 
 const int command_table_size = sizeof(command_table) / sizeof(command_table[0]);
