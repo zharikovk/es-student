@@ -2,7 +2,7 @@
 #include "pico/stdlib.h"
 #include "led-task.h"
 #define PICO_DEFAULT_BUTTON_PIN 15
-#define DEBOUNCE_MS 20
+#define DEBOUNCE_MS 20000
 
 
 typedef enum {
