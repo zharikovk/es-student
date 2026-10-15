@@ -2,7 +2,8 @@
 #include "pico/stdlib.h"// добавляем заголовочный файл функций ввода-вывода
 #include <stdio.h>// добавляем заголовочные файлы SDK
 #include <string.h>// добавляем заголовочные файлы SDK
-
+#define DEVICE_NAME "231-firmware-template"
+#define FIRMWARE_VERSION "1.0.0"
 #include "log.h" // модуль журнала
 #include "api.h"
 #include "stdio-text-protocol.h"

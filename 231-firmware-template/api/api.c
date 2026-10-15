@@ -27,9 +27,15 @@ typedef struct
 static void cmd_info(const command_t *command) 
 {
     // Паспорт устройства 
-    char info_buffer[256]; 
-    device_get_info(info_buffer, sizeof(info_buffer));
-    printf("%s", info_buffer);
+	device_info_t info;
+    device_get_info(&info);
+   	printf("project: %s\r\n", info.project);
+    printf("repo: %s\r\n", info.repo);
+    printf("board: %s\r\n", info.board);
+    printf("serial: %s\r\n", info.serial);
+    printf("chip: manufacturer 0x%03x, part 0x%04x, revision %u\r\n", 
+           info.chip_manufacturer, info.chip_part, info.chip_revision);
+    printf("pico-sdk: %s\r\n", info.pico_sdk_version);
 }
 
 static void cmd_uptime(const command_t *command)
