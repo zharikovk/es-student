@@ -27,7 +27,9 @@ typedef struct
 static void cmd_info(const command_t *command) 
 {
     // Паспорт устройства 
-    device_info();
+    char info_buffer[256]; 
+    device_get_info(info_buffer, sizeof(info_buffer));
+    printf("%s", info_buffer);
 }
 
 static void cmd_uptime(const command_t *command)
@@ -38,17 +40,24 @@ static void cmd_uptime(const command_t *command)
 }
 
 
-static void main_time_exec(const command_t *command)
+static void cmd_profiling(const command_t *command) 
 {
-	printf("iteration avg %.2f us, max %u us\n", profiling_avg_us(), (unsigned)profiling_max_us());
+    profiling_result_t res;
+    // выборка команд в main.c
+    for (uint32_t i = 0; i < PROFILING_MAX_STOPWATCHES; i++) 
+    {
+        if (profiling_get(i, &res)) 
+        {
+            printf("%-10s count %-10u mean %-6.2f us  max %-4u us\r\n", 
+                   res.name, res.count, res.mean, res.max);
+        }
+    }
 }
-
-static void main_time_reset(const command_t *command)
+static void cmd_profiling_reset(const command_t *command) 
 {
-	profiling_reset_max();
-	printf("max reset\n");
+    profiling_reset();
+    printf("profiling reset\r\n");
 }
-
 // Число без знака из десятичной записи. false — в записи не только цифры
 // или число не помещается в uint32_t.
 static bool parse_u32(const char *text, uint32_t *value)
@@ -203,8 +212,8 @@ const api_command_t command_table[] =
     {"uptime", cmd_uptime, "time since reset"},
 	{"pi_start", cmd_pi_start, "calculate pi: pi_start [terms]"},
 	{"pi", cmd_pi, "pi calculation result or 'busy'"},
-	{"main_time_exec", main_time_exec, "superloop iteration: average and maximum"},
-	{"main_time_reset", main_time_reset, "reset maximum iteration"},
+	{"profiling", cmd_profiling, "superloop iteration: average and maximum"},
+	{"profiling_reset", cmd_profiling_reset, "reset profiling"},
     {"led_enable",  cmd_led_enable,  "turn LED on"},
     {"led_disable",  cmd_led_disable,  "turn LED off"},
     {"led_blink",  cmd_led_blink,  "start LED blinkin"},

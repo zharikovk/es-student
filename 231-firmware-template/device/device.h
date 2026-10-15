@@ -4,6 +4,7 @@
 
 #include <stdio.h>
 #include <stdint.h>
+#include <stddef.h>
 #define DEVICE_NAME "es-led-module"// имя устройства, версия прошивки
 #define FIRMWARE_VERSION "1.1.0"
 
@@ -14,15 +15,4 @@
 #define DEVICE_BOARD "unknown"
 #endif
 
-void device_info(void);
-void fw_info(void);
-
-struct info_t
-{
-    uint32_t version;
-    char name[13];
-    uint8_t revision;
-};
-
-extern struct info_t device_card;
-void dev_info(void);
+void device_get_info(char *buffer, size_t max_len);
