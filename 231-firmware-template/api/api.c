@@ -11,6 +11,7 @@
 #include <stdlib.h>
 #include "led-task.h"
 #include "button-task.h"
+#include "pi-task.h"
 
 // обработчик команды: получает имя и аргументы
 typedef void (*api_callback_t)(const command_t *command);
@@ -73,59 +74,56 @@ static bool parse_u32(const char *text, uint32_t *value)
 }
 
 //////////////////////////////////
-static double calc_pi(uint terms)
+static void cmd_pi_start(const command_t *command) 
 {
-    double sum = 0.0;
-    double sign = 1.0;
-
-    for (int k = 0; k < terms; k++) 
-    {
-        // Прибавить очередной член ряда: ±1 / (2k + 1)
-        sum += sign / (2.0 * k + 1.0);
-        sign = -sign;
-    }
-
-    // Сумма ряда равна π/4
-    return 4.0 * sum;
-}
-
-///3. Замерить расчёт
-///Время расчёта измеряется разностью двух показаний часов. Первое снимается перед расчётом, второе сразу ///после него. Добавьте в main.c обработчик команды://
-volatile double pi_result;
-
-static void cmd_calc_pi(const command_t *command)
-{
-    uint32_t terms;
+    uint32_t terms=100000;
     uint64_t start_us = time_us_64();
     if (command->argc > 1) 
     {
-        // Слишком много аргументов
-        printf("error: usage calc_pi [terms]\n");
+        printf("error: usage pi_start [terms]\n");
         return;
     }
     if (command->argc == 1) 
     {
-        if (!parse_u32(command->argv[0], &terms)) 
+        if (!parse_u32(command->argv[0], &terms) || terms == 0) 
         {
-            // Не удалось разобрать как число
-            printf("error: usage calc_pi [terms]\n");
+            printf("error: usage pi_start [terms]\n");
             return;
         }
-        // 3. Проверка на ноль
-        if (terms == 0) 
-        {
-            printf("error: terms must be positive\n");
-            return;
-        }
+    }   
+    if (pi_task_get_state() == PI_STATE_RUNNING) 
+    {
+        printf("error: pi is busy\r\n");
+        return;
     }
-    pi_result = calc_pi(terms);
-    uint64_t spent_us = time_us_64() - start_us;
-
-    printf("pi: %.8f\n", pi_result);
-    printf("time: %llu ms\n", spent_us / 1000);
+    pi_task_start(terms);
+    printf("pi: running\n");
 }
+///3. Замерить расчёт
+///Время расчёта измеряется разностью двух показаний часов. Первое снимается перед расчётом, второе сразу ///после него. Добавьте в main.c обработчик команды://
+//volatile double pi_result;
 
+static void cmd_pi(const command_t *command)
+{
+    pi_state_t state = pi_task_get_state();
 
+    if (state == PI_STATE_RUNNING) 
+    {
+        printf("pi: running\r\n");
+    } else if (state == PI_STATE_READY) 
+    {
+        double result;
+        uint32_t time_ms;
+        if (pi_task_get_result(&result, &time_ms)) 
+        {
+            printf("pi: %.8f, time: %lu ms\n", result, (unsigned) time_ms);
+        }
+    } else 
+    {
+        printf("pi: not started\r\n");
+    }
+}
+//////////////////////////////////////////////////
 
 static void cmd_help(const command_t *command) 
 {
@@ -203,7 +201,8 @@ const api_command_t command_table[] =
     {"help",  cmd_help,  "list of commands"},
     {"info",  cmd_info,  "device passport"},
     {"uptime", cmd_uptime, "time since reset"},
-	{"calc_pi", cmd_calc_pi, "calculate pi: calc_pi [terms]"},
+	{"pi_start", cmd_pi_start, "calculate pi: pi_start [terms]"},
+	{"pi", cmd_pi, "pi calculation result or 'busy'"},
 	{"main_time_exec", main_time_exec, "superloop iteration: average and maximum"},
 	{"main_time_reset", main_time_reset, "reset maximum iteration"},
     {"led_enable",  cmd_led_enable,  "turn LED on"},

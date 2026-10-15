@@ -8,6 +8,7 @@
 #include "profiling.h"
 #include "led-task.h"
 #include "button-task.h"
+#include "pi-task.h"
 
 int main() //inlet)
 {
@@ -23,6 +24,7 @@ int main() //inlet)
 	    profiling_iteration();// учитываем прошлую итерацию
 	    led_task_handle();// мигаем светодиодом
         button_task_handle();
+        pi_task_handle();
         
         const command_t *command = stdio_text_protocol_handle();
         if (command != NULL) {
