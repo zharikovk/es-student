@@ -1,5 +1,6 @@
 #include "pi-task.h"
 #include "pico/stdlib.h"
+#include "systime/systime.h"
 
 #define PI_TERMS_PER_CALL 2000
 
@@ -21,7 +22,7 @@ void pi_task_start(uint32_t n)
     pi_k = 0;
     pi_sum = 0.0;
     pi_sign = 1.0;
-    start_time_us = time_us_64();
+    start_time_us = systime_us();
 }
 
 void pi_task_handle(void)
@@ -46,7 +47,7 @@ void pi_task_handle(void)
     if (pi_k == pi_n) 
     {
         pi_result = 4.0 * pi_sum;
-        calc_time_ms = (uint32_t)((time_us_64() - start_time_us) / 1000);
+        calc_time_ms = (uint32_t)((systime_us() - start_time_us) / 1000);
         pi_state = PI_STATE_READY;
     }
 }

@@ -1,6 +1,6 @@
 // log.c
 
-#include "log.h"
+#include "logging/log.h"
 
 ///////////////////////ф-ия подписи
 void log_prefix(const char *level, const char *function, int line)

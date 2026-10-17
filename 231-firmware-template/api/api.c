@@ -1,17 +1,19 @@
 // api.c
-#include "device.h" // модуль железа
+#include "device/device.h" // модуль железа
 #include "api.h"
 #include <stdio.h>
 #include <string.h>
 #include "pico/stdlib.h" 
-#include "profiling.h"
-#include "stdio-text-protocol.h"
+#include "profiling/profiling.h"
+#include "stdio-text-protocol/stdio-text-protocol.h"
 #include <ctype.h>
 #include <errno.h>
 #include <stdlib.h>
 #include "led-task.h"
 #include "button-task.h"
 #include "pi-task.h"
+#include "firmware.h"
+#include "systime/systime.h"
 
 // обработчик команды: получает имя и аргументы
 typedef void (*api_callback_t)(const command_t *command);
@@ -28,26 +30,27 @@ static void cmd_info(const command_t *command)
 {
     // Паспорт устройства 
 	device_info_t info;
-    device_get_info(&info);
-   	printf("project: %s\r\n", info.project);
-    printf("repo: %s\r\n", info.repo);
-    printf("board: %s\r\n", info.board);
-    printf("serial: %s\r\n", info.serial);
-    printf("chip: manufacturer 0x%03x, part 0x%04x, revision %u\r\n", 
+    device_get_info(&info, FIRMWARE_PROJECT, FIRMWARE_REPO, FIRMWARE_BOARD);
+   	printf("project: %s\n", info.project);
+    printf("repo: %s\n", info.repo);
+    printf("board: %s\n", info.board);
+    printf("serial: %s\n", info.serial);
+    printf("chip: manufacturer 0x%03x, part 0x%04x, revision %u\n", 
            info.chip_manufacturer, info.chip_part, info.chip_revision);
-    printf("pico-sdk: %s\r\n", info.pico_sdk_version);
+    printf("pico-sdk: %s\n", info.pico_sdk_version);
 }
 
 static void cmd_uptime(const command_t *command)
 {
     // Время в миллисекундах с момента включения
-    uint64_t uptime_ms = time_us_64() / 1000;
-    printf("uptime: %llu ms\n", time_us_64() / 1000);
+    uint64_t uptime_ms = systime_us() / 1000;
+    printf("uptime: %llu ms\n", systime_us() / 1000);
 }
 
 
 static void cmd_profiling(const command_t *command) 
 {
+#if PROFILING_ENABLED
     profiling_result_t res;
     // выборка команд в main.c
     for (uint32_t i = 0; i < PROFILING_MAX_STOPWATCHES; i++) 
@@ -58,6 +61,9 @@ static void cmd_profiling(const command_t *command)
                    res.name, res.count, res.mean, res.max);
         }
     }
+#else
+    printf("profiling is disabled in this build\r\n");
+#endif
 }
 static void cmd_profiling_reset(const command_t *command) 
 {
@@ -92,7 +98,7 @@ static bool parse_u32(const char *text, uint32_t *value)
 static void cmd_pi_start(const command_t *command) 
 {
     uint32_t terms=100000;
-    uint64_t start_us = time_us_64();
+    uint64_t start_us = systime_us();
     if (command->argc > 1) 
     {
         printf("error: usage pi_start [terms]\n");

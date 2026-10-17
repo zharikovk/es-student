@@ -2,15 +2,16 @@
 #include "pico/stdlib.h"// добавляем заголовочный файл функций ввода-вывода
 #include <stdio.h>// добавляем заголовочные файлы SDK
 #include <string.h>// добавляем заголовочные файлы SDK
-#define DEVICE_NAME "231-firmware-template"
+#define FIRMWARE_NAME "231-firmware-template"
 #define FIRMWARE_VERSION "1.0.0"
-#include "log.h" // модуль журнала
+#include "logging/log.h" // модуль журнала
 #include "api.h"
-#include "stdio-text-protocol.h"
-#include "profiling.h"
+#include "stdio-text-protocol/stdio-text-protocol.h"
+#include "profiling/profiling.h"
 #include "led-task.h"
 #include "button-task.h"
 #include "pi-task.h"
+#include "firmware.h"
 
 typedef enum {
     STOPWATCH_LOOP,
@@ -27,7 +28,7 @@ int main() //inlet)
     sleep_ms(1500);
     ////////////////////////Ф-ия версии
 // печатаем имя, версию, дату и время сборки, текущий уровень
-    LOG_INF("device: %s %s\n", DEVICE_NAME, FIRMWARE_VERSION);
+    LOG_INF("device: %s %s\n", FIRMWARE_NAME, FIRMWARE_VERSION);
     stdio_text_protocol_init();
     stdio_init_all();// включаем стандартный ввод-вывод
     // весь дальнейший код пишем здесь

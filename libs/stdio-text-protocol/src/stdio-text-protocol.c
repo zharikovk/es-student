@@ -1,6 +1,6 @@
 // stdio-text-protocol.c
 
-#include "stdio-text-protocol.h"
+#include "stdio-text-protocol/stdio-text-protocol.h"
 #include <stdio.h>
 #include "pico/stdlib.h"
 #include <string.h>

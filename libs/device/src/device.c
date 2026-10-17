@@ -6,17 +6,19 @@
 #include "pico/unique_id.h"//даёт функцию чтения серийного номера
 #include "hardware/regs/addressmap.h"//базовый адрес `SYSINFO_BASE
 #include "hardware/regs/sysinfo.h"//смещение регистра и имена масок.
-#include "pico/version.h"
-#include "device.h"
+#include "device/device.h"
 
 
-void device_get_info(device_info_t *info)
+void device_get_info(device_info_t *info, 
+                     const char *project, 
+                     const char *repo, 
+                     const char *board)
 {// 
 	if (!info) return;
     
-    info->project = DEVICE_PROJECT;
-    info->repo = DEVICE_REPO;
-    info->board = DEVICE_BOARD;
+    info->project = project;
+    info->repo = repo;
+    info->board = board;
     info->pico_sdk_version = PICO_SDK_VERSION_STRING;
     
     pico_get_unique_board_id_string(info->serial, sizeof(info->serial));  

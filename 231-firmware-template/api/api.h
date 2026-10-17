@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "stdio-text-protocol.h"
+#include "stdio-text-protocol/stdio-text-protocol.h"
 
 
 void api_init(void);

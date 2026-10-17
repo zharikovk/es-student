@@ -1,6 +1,8 @@
 #include "button-task.h"
 #include "pico/stdlib.h"
 #include "led-task.h"
+#include "systime/systime.h"
+
 #define PICO_DEFAULT_BUTTON_PIN 15
 #define DEBOUNCE_MS 20000
 
@@ -33,14 +35,14 @@ void button_task_init(void)
     gpio_set_dir(PICO_DEFAULT_BUTTON_PIN, GPIO_IN);
     gpio_pull_up(PICO_DEFAULT_BUTTON_PIN);
     button_state = BUTTON_RELEASED;
-    last_change_us = time_us_64();
+    last_change_us = systime_us();
     press_count = 0;
 }
 
 void button_task_handle(void)
 {
     bool press_state = (gpio_get(PICO_DEFAULT_BUTTON_PIN) == false);// читаем уровень: нажатая кнопка замыкает вывод на землю и даёт ноль
-    uint64_t now_us = time_us_64();// читаем часы  
+    uint64_t now_us = systime_us();// читаем часы  
     // Действие при входе: выполняется один раз, в момент перехода
     switch (button_state) 
     {
