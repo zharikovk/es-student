@@ -1,30 +1,47 @@
-// api.c
-#include "device/device.h" // модуль железа
+// api-callbacks.c
 #include "api.h"
-#include <stdio.h>
-#include <string.h>
-#include "pico/stdlib.h" 
+#include "api-commands.h"
+#include "device/device.h" // модуль железа
+#include "firmware.h"
+#include "systime/systime.h"
 #include "profiling/profiling.h"
 #include "stdio-text-protocol/stdio-text-protocol.h"
-#include <ctype.h>
-#include <errno.h>
-#include <stdlib.h>
 #include "led-task.h"
 #include "button-task.h"
 #include "pi-task.h"
-#include "firmware.h"
-#include "systime/systime.h"
+#include <ctype.h>
+#include <errno.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
 
-// обработчик команды: получает имя и аргументы
-typedef void (*api_callback_t)(const command_t *command);
-// Структура одной строки в таблице команд
-// команда прибора: имя, справка для help и обработчик
-typedef struct
+
+
+static bool parse_u32(const char *text, uint32_t *value)
 {
-    const char *name;
-    api_callback_t callback;
-    const char *help;
-} api_command_t;
+    if (text == 0 || *text == '\0') return false;
+    // strtoul приняла бы и знак: из "-1" получилось бы 4294967295
+    if (!isdigit((unsigned char)text[0]))
+    {
+        return false;
+    }
+
+    char *end;
+    errno = 0;
+    unsigned long number = strtoul(text, &end, 10);
+
+    // после числа остались символы или число не поместилось
+    if (*end != '\0' || errno == ERANGE || number > UINT32_MAX)
+    {
+        return false;
+    }
+
+    *value = (uint32_t)number;
+    return true;
+}
+
+
+
 
 static void cmd_info(const command_t *command) 
 {
@@ -47,54 +64,6 @@ static void cmd_uptime(const command_t *command)
     printf("uptime: %llu ms\n", systime_us() / 1000);
 }
 
-
-static void cmd_profiling(const command_t *command) 
-{
-#if PROFILING_ENABLED
-    profiling_result_t res;
-    // выборка команд в main.c
-    for (uint32_t i = 0; i < PROFILING_MAX_STOPWATCHES; i++) 
-    {
-        if (profiling_get(i, &res)) 
-        {
-            printf("%-10s count %-10u mean %-6.2f us  max %-4u us\r\n", 
-                   res.name, res.count, res.mean, res.max);
-        }
-    }
-#else
-    printf("profiling is disabled in this build\r\n");
-#endif
-}
-static void cmd_profiling_reset(const command_t *command) 
-{
-    profiling_reset();
-    printf("profiling reset\r\n");
-}
-// Число без знака из десятичной записи. false — в записи не только цифры
-// или число не помещается в uint32_t.
-static bool parse_u32(const char *text, uint32_t *value)
-{
-    // strtoul приняла бы и знак: из "-1" получилось бы 4294967295
-    if (!isdigit((unsigned char)text[0]))
-    {
-        return false;
-    }
-
-    char *end;
-    errno = 0;
-    unsigned long number = strtoul(text, &end, 10);
-
-    // после числа остались символы или число не поместилось
-    if (*end != '\0' || errno == ERANGE || number > UINT32_MAX)
-    {
-        return false;
-    }
-
-    *value = (uint32_t)number;
-    return true;
-}
-
-//////////////////////////////////
 static void cmd_pi_start(const command_t *command) 
 {
     uint32_t terms=100000;
@@ -120,9 +89,6 @@ static void cmd_pi_start(const command_t *command)
     pi_task_start(terms);
     printf("pi: running\n");
 }
-///3. Замерить расчёт
-///Время расчёта измеряется разностью двух показаний часов. Первое снимается перед расчётом, второе сразу ///после него. Добавьте в main.c обработчик команды://
-//volatile double pi_result;
 
 static void cmd_pi(const command_t *command)
 {
@@ -146,17 +112,37 @@ static void cmd_pi(const command_t *command)
 }
 //////////////////////////////////////////////////
 
-static void cmd_help(const command_t *command) 
+static void cmd_profiling(const command_t *command) 
 {
-
-    extern const api_command_t command_table[];
-    extern const int command_table_size;
-    
-    for (uint32_t i = 0; i < command_table_size; i++) 
+#if PROFILING_ENABLED
+    profiling_result_t res;
+    // выборка команд в main.c
+    for (uint32_t i = 0; i < PROFILING_MAX_STOPWATCHES; i++) 
     {
-        printf("  %-15s %s\r\n", command_table[i].name, command_table[i].help);
+        if (profiling_get(i, &res)) 
+        {
+            printf("%-10s count %-10u mean %-6.2f us  max %-4u us\r\n", 
+                   res.name, res.count, res.mean, res.max);
+        }
     }
+#else
+    printf("profiling is disabled in this build\r\n");
+#endif
 }
+static void cmd_profiling_reset(const command_t *command) 
+{
+    profiling_reset();
+    printf("profiling reset\r\n");
+}
+// Число без знака из десятичной записи. false — в записи не только цифры
+// или число не помещается в uint32_t.
+
+
+//////////////////////////////////
+
+///3. Замерить расчёт
+///Время расчёта измеряется разностью двух показаний часов. Первое снимается перед расчётом, второе сразу ///после него. Добавьте в main.c обработчик команды://
+//volatile double pi_result;
 
 static void cmd_led_enable(const command_t *command)
 {
@@ -200,10 +186,10 @@ static void cmd_led_period(const command_t *command)
 //////////////////////////
 static void cmd_button(const command_t *command) 
 {
-    bool pressed = button_task_is_pressed();
+    bool is_pressed = button_task_is_pressed();
     uint32_t count = button_task_get_press_count();
     
-    if (pressed) 
+    if (is_pressed) 
     {
         printf("button: pressed, presses %lu\n", (unsigned)count);
     } else 
@@ -212,14 +198,8 @@ static void cmd_button(const command_t *command)
     }
 }
 
-///////////////////////////
-/////////////////////////
-///////////// /////////////
-////////// ///////////////
-/////// /////////////////
-const api_command_t command_table[] = 
+const api_command_t api_commands[] = 
 {
-    {"help",  cmd_help,  "list of commands"},
     {"info",  cmd_info,  "device passport"},
     {"uptime", cmd_uptime, "time since reset"},
 	{"pi_start", cmd_pi_start, "calculate pi: pi_start [terms]"},
@@ -233,34 +213,4 @@ const api_command_t command_table[] =
     {"button",  cmd_button,  "show button state and press count"},
 };
 
-const int command_table_size = sizeof(command_table) / sizeof(command_table[0]);
-
-void api_init(void) 
-{
-    // Пока ничего 
-}
-
-void api_handle(const command_t *command) 
-{
-    if (command->truncated) 
-    {
-        printf("error: command longer than 63 characters or 4 arguments\r\n");
-        return;
-    }
-
-    if (command->name == 0) 
-    {
-        return;
-    }
-
-
-    for (uint32_t i = 0; i < command_table_size; i++) 
-    {
-        if (strcmp(command->name, command_table[i].name) == 0) 
-        {
-            command_table[i].callback(command);
-            return;
-        }
-    }
-    printf("error: unknown command '%s', try help\n", command->name);
-}
+const uint32_t api_command_count = sizeof(api_commands) / sizeof(api_commands[0]);

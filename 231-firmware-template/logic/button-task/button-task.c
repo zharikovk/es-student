@@ -1,11 +1,7 @@
 #include "button-task.h"
-#include "pico/stdlib.h"
-#include "led-task.h"
+#include "platform/platform.h"
 #include "systime/systime.h"
-
-#define PICO_DEFAULT_BUTTON_PIN 15
 #define DEBOUNCE_MS 20000
-
 
 typedef enum {
     BUTTON_RELEASED,       // Кнопка отпущена
@@ -17,6 +13,7 @@ typedef enum {
 static button_state_t button_state = BUTTON_RELEASED;
 static uint64_t last_change_us = 0;
 static uint32_t press_count = 0;
+static button_press_callback_t press_callback = 0;
 
 bool button_task_is_pressed(void)
 {
@@ -28,12 +25,9 @@ uint32_t button_task_get_press_count(void)
     return press_count;
 }
 ////////////////////////////////////////////////////////////
-void button_task_init(void)
+void button_task_init(button_press_callback_t on_press)
 {
-    // настраиваем вывод кнопки
-    gpio_init(PICO_DEFAULT_BUTTON_PIN);
-    gpio_set_dir(PICO_DEFAULT_BUTTON_PIN, GPIO_IN);
-    gpio_pull_up(PICO_DEFAULT_BUTTON_PIN);
+    press_callback = on_press;// запоминаем функцию
     button_state = BUTTON_RELEASED;
     last_change_us = systime_us();
     press_count = 0;
@@ -41,7 +35,7 @@ void button_task_init(void)
 
 void button_task_handle(void)
 {
-    bool press_state = (gpio_get(PICO_DEFAULT_BUTTON_PIN) == false);// читаем уровень: нажатая кнопка замыкает вывод на землю и даёт ноль
+    bool press_state = (platform_button_read() == false);// читаем уровень: нажатая кнопка замыкает вывод на землю и даёт ноль
     uint64_t now_us = systime_us();// читаем часы  
     // Действие при входе: выполняется один раз, в момент перехода
     switch (button_state) 
@@ -63,7 +57,10 @@ void button_task_handle(void)
         {
         	button_state = BUTTON_PRESSED;
         	press_count++;// увеличиваем счётчик
-        	led_task_next_state();//и вызываем led_task_next_state()
+        	if (press_callback != 0) 
+        	{
+                    press_callback();
+            }
         }
     	break;
     case BUTTON_PRESSED:

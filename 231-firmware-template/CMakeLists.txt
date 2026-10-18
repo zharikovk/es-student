@@ -10,35 +10,58 @@ project(231_firmware_template)
 pico_sdk_init()
 add_compile_options(-Wall)
 add_subdirectory(../libs ${CMAKE_BINARY_DIR}/libs)
+add_library(platform STATIC
+    platform/platform.c
+)
+target_include_directories(platform PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+target_link_libraries(platform PRIVATE pico_stdlib)
+add_library(logic STATIC
+	logic/api/api.c
+    logic/api/api-callbacks.c
+    logic/led-task/led-task.c
+    logic/button-task/button-task.c
+    logic/pi-task/pi-task.c
+)
+target_include_directories(logic PUBLIC 
+    ${CMAKE_CURRENT_SOURCE_DIR}/logic/api
+    ${CMAKE_CURRENT_SOURCE_DIR}/logic/led-task
+    ${CMAKE_CURRENT_SOURCE_DIR}/logic/button-task
+    ${CMAKE_CURRENT_SOURCE_DIR}/logic/pi-task
+)
+target_link_libraries(logic PUBLIC 
+    stdio-text-protocol
+)
+target_link_libraries(logic PRIVATE 
+    platform 
+    profiling 
+    device 
+    logging 
+    systime
+)
+add_executable(${PROJECT_NAME}
+    main.c
+)
+target_link_libraries(${PROJECT_NAME} PRIVATE
+    pico_stdlib       
+    logic             
+    logging           
+    profiling         
+    systime 
+)
+target_include_directories(${PROJECT_NAME} PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR} 
+)
+target_compile_definitions(${PROJECT_NAME} PRIVATE
+    FIRMWARE_NAME="${PROJECT_NAME}"
+    FIRMWARE_VERSION="1.1.0"
+    FIRMWARE_PROJECT="${PROJECT_NAME}"
+    FIRMWARE_REPO="https://github.com/zharikovk/es-student"
+    FIRMWARE_BOARD="${PICO_BOARD}"
+)
 # выключатель профилирования: 0 — вызовов секундомеров в образе нет
 target_compile_definitions(profiling PUBLIC
     PROFILING_ENABLED=1
 )
-add_executable(${PROJECT_NAME}
-    ${CMAKE_CURRENT_SOURCE_DIR}/main.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/led-task/led-task.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/api/api.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/button-task/button-task.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/pi-task/pi-task.c
-)
-target_link_libraries(${PROJECT_NAME} PRIVATE
-    pico_stdlib
-    pico_unique_id
-    device
-    logging
-    profiling
-    stdio-text-protocol
-    systime
-)
-
-target_include_directories(${PROJECT_NAME} PRIVATE
-    ${CMAKE_CURRENT_SOURCE_DIR}/led-task
-    ${CMAKE_CURRENT_SOURCE_DIR}/api
-    ${CMAKE_CURRENT_SOURCE_DIR}/button-task
-    ${CMAKE_CURRENT_SOURCE_DIR}/pi-task
-    ${CMAKE_CURRENT_SOURCE_DIR}
-)
-
 pico_enable_stdio_usb(${PROJECT_NAME} 1)
 pico_enable_stdio_uart(${PROJECT_NAME} 0)
 pico_add_extra_outputs(${PROJECT_NAME})
