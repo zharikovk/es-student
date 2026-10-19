@@ -24,7 +24,7 @@ void api_handle(const command_t *command)
     }
 	if (strcmp(command->name, "help") == 0) 
 	{
-        printf("Available commands:\n");
+        printf("help\n");
         for (uint32_t i = 0; i < api_command_count; i++) 
         {
             printf("  %-15s - %s\n", api_commands[i].name, api_commands[i].help_text);

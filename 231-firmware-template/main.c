@@ -23,7 +23,7 @@ typedef enum {
 int main() //inlet)
 {
     platform_init();
-    sleep_ms(1500);
+    platform_delay_ms(1500);
     LOG_INF("device: %s %s\n", FIRMWARE_NAME, FIRMWARE_VERSION);
     stdio_text_protocol_init();
     led_task_init();

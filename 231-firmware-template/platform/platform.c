@@ -27,3 +27,7 @@ bool platform_button_read(void)
 {
     return (gpio_get(BUTTON_PIN) == false);
 }
+void platform_delay_ms(uint32_t ms) 
+{
+    sleep_ms(ms);
+}

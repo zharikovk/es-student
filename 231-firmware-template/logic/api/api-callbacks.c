@@ -77,19 +77,24 @@ static void cmd_pi_start(const command_t *command)
     }
     if (command->argc == 1) 
     {
-        if (!parse_u32(command->argv[0], &terms) || terms == 0) 
+        if (!parse_u32(command->argv[0], &terms)) 
         {
-            printf("error: usage pi_start [terms]\n");
+            printf("error: usage pi_start [<terms>]\n");
             return;
         }
-    }   
+    }
+    if (terms == 0) 
+    {
+        printf("error: terms must be greater than 0\n");
+        return;
+    }  
     if (pi_task_get_state() == PI_STATE_RUNNING) 
     {
-        printf("error: pi is busy\r\n");
+        printf("error: pi is busy\n");
         return;
     }
     pi_task_start(terms);
-    printf("pi: running\n");
+    printf("pi: started, %lu terms\n", (unsigned)terms);
 }
 
 static void cmd_pi(const command_t *command)
@@ -105,11 +110,11 @@ static void cmd_pi(const command_t *command)
         uint32_t time_ms;
         if (pi_task_get_result(&result, &time_ms)) 
         {
-            printf("pi: %.8f, time: %lu ms\n", result, (unsigned) time_ms);
+            printf("pi: %.8f in %lu ms\n", result, (unsigned) time_ms);
         }
     } else 
     {
-        printf("pi: not started\r\n");
+        printf("pi: not started\n");
     }
 }
 //////////////////////////////////////////////////
@@ -169,17 +174,23 @@ static void cmd_led_period(const command_t *command)
 {
     uint32_t period_ms;
 
-    if (command->argc != 1 || !parse_u32(command->argv[0], &period_ms))
+    if (command->argc != 1 || !parse_u32(command->argv[0], &period_ms) || period_ms == 0)
     {
-        printf("error: usage led_period <period_ms>\n");
+        printf("error: usage led_period <ms>\n");
         return;
     }
-
+	led_task_set_period_ms(period_ms);
+    led_state_t state = led_task_get_state();
     // годится ли такой период, решает задача светодиода
-    if (!led_task_set_period_ms(period_ms))
+	if (state == LED_STATE_OFF) 
+	{
+        printf("led: off, period %lu ms\n", (unsigned) period_ms);
+    } else if (state == LED_STATE_ON) 
     {
-        printf("error: period_ms must be greater than 0\n");
-        return;
+        printf("led: on, period %lu ms\n", (unsigned) period_ms);
+    } else 
+    {
+        printf("led: blink, period %lu ms\n", (unsigned) period_ms);
     }
 
     // ответ: состояние и период светодиода

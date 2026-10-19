@@ -10,6 +10,10 @@ static uint64_t last_toggle_us;
 static uint32_t current_period_ms = 1000;
 static bool is_led_on = false;
 // Вспомогательная функция: из других файлов её не вызвать
+led_state_t led_task_get_state(void) 
+{
+    return led_state;
+}
 static void led_set(bool on)
 {
     platform_led_set(true);

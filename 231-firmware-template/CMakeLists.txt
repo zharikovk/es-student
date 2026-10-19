@@ -51,13 +51,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
 target_include_directories(${PROJECT_NAME} PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR} 
 )
-target_compile_definitions(${PROJECT_NAME} PRIVATE
-    FIRMWARE_NAME="${PROJECT_NAME}"
-    FIRMWARE_VERSION="1.1.0"
-    FIRMWARE_PROJECT="${PROJECT_NAME}"
-    FIRMWARE_REPO="https://github.com/zharikovk/es-student"
-    FIRMWARE_BOARD="${PICO_BOARD}"
-)
+
 # выключатель профилирования: 0 — вызовов секундомеров в образе нет
 target_compile_definitions(profiling PUBLIC
     PROFILING_ENABLED=1
