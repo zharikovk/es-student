@@ -23,7 +23,10 @@ typedef enum {
 int main() //inlet)
 {
     platform_init();
-    platform_delay_ms(1500);
+    uint64_t start_wait = systime_ms();
+    while (systime_ms() - start_wait < 1500) 
+    {
+    }
     LOG_INF("device: %s %s\n", FIRMWARE_NAME, FIRMWARE_VERSION);
     stdio_text_protocol_init();
     led_task_init();

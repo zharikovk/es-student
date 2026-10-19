@@ -18,3 +18,4 @@ typedef struct {
 
 extern const api_command_t api_commands[];
 extern const uint32_t api_command_count;
+void cmd_help(const command_t *cmd); 
