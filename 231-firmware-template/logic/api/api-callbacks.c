@@ -48,6 +48,8 @@ static void cmd_info(const command_t *command)
     // Паспорт устройства 
 	device_info_t info;
     device_get_info(&info, FIRMWARE_PROJECT, FIRMWARE_REPO, FIRMWARE_BOARD);
+    printf("name: %s\r\n", FIRMWARE_NAME);
+    printf("version: %s\r\n", FIRMWARE_VERSION);
    	printf("project: %s\n", info.project);
     printf("repo: %s\n", info.repo);
     printf("board: %s\n", info.board);

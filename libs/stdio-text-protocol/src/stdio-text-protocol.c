@@ -61,27 +61,33 @@ static void parse_command(char *str) {
     }
 }
 
-const command_t *stdio_text_protocol_handle(void) {
+const command_t *stdio_text_protocol_handle(void) 
+{
     // Читаем один символ, не ожидая его (0 микросекунд таймаута)
     // Если ничего не нажато, вернется PICO_ERROR_TIMEOUT
     int c = getchar_timeout_us(0);
 
-    if (c == PICO_ERROR_TIMEOUT) {
+    if (c == PICO_ERROR_TIMEOUT) 
+    {
         return 0; // Нечего обрабатывать, выходим сразу, не блокируя процессор
     }
 
     // Обработка нажатия Enter (конец строки)
-    if (c == '\r' || c == '\n') {
+    if (c == '\r' || c == '\n') 
+    {
         putchar('\r');
         putchar('\n'); // Красивый перенос строки в терминале
 
-        if (line_len > 0) {
+        if (line_len > 0 || current_command.truncated) 
+        {
             line_buffer[line_len] = '\0'; // Завершаем строку нуль-терминатором
             
             // Если строка влезла в буфер целиком, парсим её
-            if (!current_command.truncated) {
-                parse_command(line_buffer);
-            }
+ //           if (!current_command.truncated) 
+ //           {
+             current_command.truncated = false;
+             parse_command(line_buffer);
+ //           }
             
             line_len = 0; // Сбрасываем счетчик для следующей команды
             return &current_command; // Возвращаем готовую команду!
@@ -93,8 +99,10 @@ const command_t *stdio_text_protocol_handle(void) {
 
     // Обработка Backspace (стирание символа)
     // Коды backspace: 8 (\b) или 127 (DEL)
-    if (c == '\b' || c == 127) {
-        if (line_len > 0) {
+    if (c == '\b' || c == 127) 
+    {
+        if (line_len > 0) 
+        {
             line_len--;
             // Отправляем в терминал последовательность для стирания символа:
             // сдвинуть курсор назад, напечатать пробел, сдвинуть курсор назад
@@ -104,15 +112,17 @@ const command_t *stdio_text_protocol_handle(void) {
     }
 
     // Обработка обычного символа
-    if (line_len < STDIO_TEXT_PROTOCOL_LINE_SIZE - 1) {
+    if (line_len < STDIO_TEXT_PROTOCOL_LINE_SIZE - 1) 
+    {
         line_buffer[line_len] = (char)c;
         line_len++;
         putchar(c); // Эхо: показываем пользователю, что он нажал
-    } else {
+    } else 
+    {
         // Буфер переполнен!
         current_command.truncated = true;
-        line_len = 0; // Сбрасываем, чтобы начать новую строку чисто
-        return &current_command;
+//        line_len = 0; // Сбрасываем, чтобы начать новую строку чисто
+//        return &current_command;
     }
 
     return 0; // Строка еще не закончена
