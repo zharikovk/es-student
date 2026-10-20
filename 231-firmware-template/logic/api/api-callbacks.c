@@ -109,7 +109,7 @@ static void cmd_pi(const command_t *command)
         uint32_t time_ms;
         if (pi_task_get_result(&result, &time_ms)) 
         {
-            printf("pi: %.8f in %lu ms\n", result, (unsigned long) time_ms);
+            printf("pi: %.9f in %lu ms\n", result, (unsigned long) time_ms);
         }
     } else 
     {
@@ -127,7 +127,7 @@ static void cmd_profiling(const command_t *command)
     {
         if (profiling_get(i, &res)) 
         {
-            printf("%-10s count %-10lu mean %-6.2f us  max %-4lu us\r\n", 
+            printf("%-11s count %-11lu mean %.2f us  max %-4lu us\r\n", 
                    res.name, (unsigned long)res.count, res.mean, (unsigned long)res.max);
         }
     }

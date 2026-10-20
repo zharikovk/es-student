@@ -6,6 +6,7 @@
 #include "api-commands.h"
 #include "stdio-text-protocol/stdio-text-protocol.h"
 #include "profiling/profiling.h"
+#include "systime/systime.h"
 #include "led-task.h"
 #include "button-task.h"
 #include "pi-task.h"
