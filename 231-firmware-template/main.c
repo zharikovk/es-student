@@ -30,6 +30,7 @@ int main() //inlet)
     LOG_INF("device: %s %s\n", FIRMWARE_NAME, FIRMWARE_VERSION);
     stdio_text_protocol_init();
     led_task_init();
+    pi_task_init();
     api_init();
     //profiling_init(); // запоминаем начальное показание часов для профилирования
     button_task_init(led_task_next_state);

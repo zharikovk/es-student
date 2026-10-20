@@ -19,7 +19,6 @@
 
 static bool parse_u32(const char *text, uint32_t *value)
 {
-    if (text == 0 || *text == '\0') return false;
     // strtoul приняла бы и знак: из "-1" получилось бы 4294967295
     if (!isdigit((unsigned char)text[0]))
     {
@@ -69,7 +68,7 @@ static void cmd_uptime(const command_t *command)
 
 static void cmd_pi_start(const command_t *command) 
 {
-    uint32_t terms=100000;
+    uint32_t terms=1000000;
     if (command->argc > 1) 
     {
         printf("error: usage pi_start [<terms>]\n");
@@ -174,27 +173,30 @@ static void cmd_led_period(const command_t *command)
 {
     uint32_t period_ms;
 
-    if (command->argc != 1 || !parse_u32(command->argv[0], &period_ms) || period_ms == 0)
+    if (command->argc != 1 || !parse_u32(command->argv[0], &period_ms))
     {
-        printf("error: usage led_period <ms>\n");
+        printf("error: usage led_period <period_ms>\n");
         return;
     }
-	led_task_set_period_ms(period_ms);
-    led_state_t state = led_task_get_state();
+	
     // годится ли такой период, решает задача светодиода
-	if (state == LED_STATE_OFF) 
-	{
-        printf("led: off, period %lu ms\n", (unsigned long) period_ms);
+	if (!led_task_set_period_ms(period_ms))
+    {
+        printf("error: period_ms must be greater than 0\n");
+        return;
+    }
+	// ответ: состояние и период светодиода
+    led_state_t state = led_task_get_state();
+    if (state == LED_STATE_OFF) 
+    {
+        printf("led: off, period %lu ms\n", (unsigned long)period_ms);
     } else if (state == LED_STATE_ON) 
     {
-        printf("led: on, period %lu ms\n", (unsigned long) period_ms);
+        printf("led: on, period %lu ms\n", (unsigned long)period_ms);
     } else 
     {
-        printf("led: blink, period %lu ms\n", (unsigned long) period_ms);
+        printf("led: blink, period %lu ms\n", (unsigned long)period_ms);
     }
-
-    // ответ: состояние и период светодиода
-    printf("led: period %lu ms\n", (unsigned long) period_ms);
 }
 //////////////////////////
 static void cmd_button(const command_t *command) 

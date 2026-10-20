@@ -14,10 +14,7 @@ led_state_t led_task_get_state(void)
 {
     return led_state;
 }
-static void led_set(bool on)
-{
-    platform_led_set(true);
-}
+
 
 bool led_task_set_period_ms(uint32_t period_ms)
 {
