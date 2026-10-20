@@ -127,7 +127,7 @@ static void cmd_profiling(const command_t *command)
     {
         if (profiling_get(i, &res)) 
         {
-            printf("%-11s count %-11lu mean %.2f us  max %-4lu us\r\n", 
+            printf("%-11s count %-11lu mean %.2f us  max %lu us\r\n", 
                    res.name, (unsigned long)res.count, res.mean, (unsigned long)res.max);
         }
     }

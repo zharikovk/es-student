@@ -1,7 +1,7 @@
 #include "pi-task.h"
 #include "systime/systime.h"
 
-#define PI_TERMS_PER_CALL 50
+#define PI_TERMS_PER_CALL 20
 
 
 // Состояние расчёта: должно пережить возврат из обработчика
