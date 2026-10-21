@@ -34,7 +34,7 @@ int main() //inlet)
     pi_task_init();
     api_init();
     //profiling_init(); // запоминаем начальное показание часов для профилирования
-    button_task_init(BUTTON_1, led_task_next_state, led_task_force_blink);// Первая кнопка переключает состояние
+    button_task_init(BUTTON_1, led_task_next_state, led_task_blink);// Первая кнопка переключает состояние
     button_task_init(BUTTON_2, led_task_cycle_period, NULL);// Вторая кнопка меняет период
     profiling_stopwatch_init(STOPWATCH_LOOP, "loop");
     profiling_stopwatch_init(STOPWATCH_COMMAND, "command");

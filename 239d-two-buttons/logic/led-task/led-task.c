@@ -122,7 +122,7 @@ void led_task_cycle_period(void)
     }
 }
 
-void led_task_force_blink(void) //для второй кнопки вызов
+void led_task_blink(void) //для второй кнопки вызов
 {
     led_task_set_state(LED_STATE_BLINK);
 }

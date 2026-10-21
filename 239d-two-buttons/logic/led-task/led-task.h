@@ -22,4 +22,4 @@ uint32_t led_task_get_period_ms(void);
 
 void led_task_next_state(void);//button
 void led_task_cycle_period(void);
-void led_task_force_blink(void);//мигаем для 2.3.9д
+void led_task_blink(void);//мигаем для 2.3.9д
