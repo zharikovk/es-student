@@ -13,7 +13,7 @@ static bool is_led_on = false;
 led_state_t led_task_get_state(void) 
 {
     return led_state;
-} 
+}
 
 
 bool led_task_set_period_ms(uint32_t period_ms)
@@ -120,4 +120,9 @@ void led_task_cycle_period(void)
     {
         led_task_set_period_ms(250);
     }
+}
+
+void led_task_blink(void) //для второй кнопки вызов
+{
+    led_task_set_state(LED_STATE_BLINK);
 }
