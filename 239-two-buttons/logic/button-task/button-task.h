@@ -4,7 +4,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include "platform/platform.h"
-
+ 
 typedef void (*button_press_callback_t)(void);
 void button_task_init(platform_button_t button_state, button_press_callback_t on_press);
 void button_task_handle(void);

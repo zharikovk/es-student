@@ -13,7 +13,7 @@ static bool is_led_on = false;
 led_state_t led_task_get_state(void) 
 {
     return led_state;
-}
+} 
 
 
 bool led_task_set_period_ms(uint32_t period_ms)

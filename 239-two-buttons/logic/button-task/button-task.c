@@ -2,7 +2,7 @@
 #include "platform/platform.h"
 #include "systime/systime.h"
 #define DEBOUNCE_MS 20000
-
+ 
 typedef enum {
     STATE_RELEASED,       // Кнопка отпущена
     STATE_MAYBE_PRESSED,  // Возможно нажата (ждем 20 мс)
