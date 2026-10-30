@@ -16,6 +16,13 @@
 #include <stdio.h>
 #include <string.h>
 
+static void cmd_get_temp(const command_t *command)
+{
+	float temp = platform_temp_read();
+	printf("temp: %.1f C\n", temp);
+    return;	
+}	
+
 static void cmd_get_voltage(const command_t *command)
 {
 	float voltage = platform_voltage_read();
@@ -240,7 +247,8 @@ const api_command_t api_commands[] =
     {"led_blink",  cmd_led_blink,  "start LED blinkin"},
     {"led_period",  cmd_led_period,  "set blink period in ms: led_period <ms>"},
     {"button",  cmd_button,  "show button state and press count"},
-    { "get_voltage", cmd_get_voltage, "voltage on GP26, ADC input 0"}
+    { "get_voltage", cmd_get_voltage, "voltage on GP26, ADC input 0"},
+    { "get_temp", cmd_get_temp, "chip temperature, degrees Celsius"}
 };
 
 const uint32_t api_command_count = sizeof(api_commands) / sizeof(api_commands[0]);
