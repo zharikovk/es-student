@@ -10,25 +10,15 @@
 #include "led-task.h"
 #include "button-task.h"
 #include "pi-task.h"
+#include "telemetry-task.h"
 #include <ctype.h>
 #include <errno.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+// период телеметрии по умолчанию
+#define TELEMETRY_DEFAULT_PERIOD_MS 100
 
-static void cmd_get_temp(const command_t *command)
-{
-	float temp = platform_temp_read();
-	printf("temp: %.1f C\n", temp);
-    return;	
-}	
-
-static void cmd_get_voltage(const command_t *command)
-{
-	float voltage = platform_voltage_read();
-	printf("voltage: %.3f V\n", voltage);
-    return;	
-}	
 
 static bool parse_u32(const char *text, uint32_t *value)
 {
@@ -51,6 +41,63 @@ static bool parse_u32(const char *text, uint32_t *value)
     *value = (uint32_t)number;
     return true;
 }
+
+
+// api_print_telemetry(): 
+void api_print_telemetry(const telemetry_record_t *record) 
+{
+    // строка tm: <время> <напряжение %.3f> <температура %.1f>
+    printf("tm: %llu %.3f %.1f\n", 
+           (unsigned long long)record->time_us, 
+           record->voltage_v, 
+           record->temp_c);
+}
+static void cmd_tm_start(const command_t *command) 
+{
+    uint32_t period = TELEMETRY_DEFAULT_PERIOD_MS;
+    if (command->argc>1) 
+    {
+	    printf("error: usage tm_start [<period_ms>]\n");
+        return;
+	}
+    if (command->argc == 1)
+    {
+        if (!parse_u32(command->argv[0], &period))  
+        {
+            printf("error: usage tm_start [<period_ms>]\n");
+            return;
+        }
+    }
+    if (telemetry_task_start(period)) 
+    {
+        printf("telemetry: started, period %lu ms\n", (unsigned long)period);
+    } else 
+    {
+        printf("error: period_ms must be at least 10\n");
+    }
+}
+
+static void cmd_tm_stop(const command_t *command) 
+{
+    telemetry_task_stop();
+    printf("telemetry: stopped\n");
+}
+
+static void cmd_get_temp(const command_t *command)
+{
+	float temp = platform_temp_read();
+	printf("temp: %.1f C\n", temp);
+    return;	
+}	
+
+static void cmd_get_voltage(const command_t *command)
+{
+	float voltage = platform_voltage_read();
+	printf("voltage: %.3f V\n", voltage);
+    return;	
+}	
+
+
 
 
 
@@ -248,7 +295,9 @@ const api_command_t api_commands[] =
     {"led_period",  cmd_led_period,  "set blink period in ms: led_period <ms>"},
     {"button",  cmd_button,  "show button state and press count"},
     { "get_voltage", cmd_get_voltage, "voltage on GP26, ADC input 0"},
-    { "get_temp", cmd_get_temp, "chip temperature, degrees Celsius"}
+    { "get_temp", cmd_get_temp, "chip temperature, degrees Celsius"},
+    { "tm_start", cmd_tm_start, "start telemetry with optional period in ms (default 100)" },
+    { "tm_stop", cmd_tm_stop, "stop telemetry" }
 };
 
 const uint32_t api_command_count = sizeof(api_commands) / sizeof(api_commands[0]);

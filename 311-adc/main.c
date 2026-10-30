@@ -10,7 +10,7 @@
 #include "led-task.h"
 #include "button-task.h"
 #include "pi-task.h"
-
+#include "telemetry-task.h"
 
 typedef enum {
     STOPWATCH_LOOP,
@@ -18,7 +18,8 @@ typedef enum {
     STOPWATCH_LED,
     STOPWATCH_BUTTON,
     STOPWATCH_PI,
-    STOPWATCH_COUNT
+    STOPWATCH_COUNT,
+    STOPWATCH_TELEMETRY
 } stopwatch_id_t;
 
 int main() //inlet)
@@ -33,6 +34,7 @@ int main() //inlet)
     led_task_init();
     pi_task_init();
     api_init();
+    telemetry_task_init(api_print_telemetry);
     //profiling_init(); // запоминаем начальное показание часов для профилирования
     button_task_init(led_task_next_state);
     profiling_stopwatch_init(STOPWATCH_LOOP, "loop");
@@ -40,14 +42,15 @@ int main() //inlet)
     profiling_stopwatch_init(STOPWATCH_LED, "led");
     profiling_stopwatch_init(STOPWATCH_BUTTON, "button");
     profiling_stopwatch_init(STOPWATCH_PI, "pi");
-        
+    profiling_stopwatch_init(STOPWATCH_TELEMETRY, "telemetry");    
     while (1)
 	{
         profiling_start(STOPWATCH_LOOP);
 
         profiling_start(STOPWATCH_COMMAND);
         const command_t *command = stdio_text_protocol_handle();
-        if (command != NULL) {
+        if (command != NULL) 
+        {
             api_handle(command);
         }
         profiling_stop(STOPWATCH_COMMAND);
@@ -63,6 +66,10 @@ int main() //inlet)
         profiling_start(STOPWATCH_PI);
         pi_task_handle();///расчет пи
         profiling_stop(STOPWATCH_PI);
+
+        profiling_start(STOPWATCH_TELEMETRY);
+        telemetry_task_handle();
+        profiling_stop(STOPWATCH_TELEMETRY);
 
         profiling_stop(STOPWATCH_LOOP);
     }
