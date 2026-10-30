@@ -53,7 +53,7 @@ void telemetry_task_handle(void)
         case TELEMETRY_STATE_RUN: 
         {
             uint64_t current_time_us = systime_us();
-            if (systime_period_elapsed(&last_time_us, period_ms)) 
+            if (systime_period_elapsed(&last_time_us, period_ms*1000)) 
         	{
             	telemetry_record_t record;
             // записываем текущее время, напряжение и температуру
