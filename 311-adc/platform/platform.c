@@ -13,6 +13,8 @@
 #define ADC_LEVELS 4096
 // встроенный датчик температуры — канал 4
 #define ADC_TEMP_CHANNEL 4
+// вывод, через резистор заряжающий конденсатор RC-цепи
+#define CHARGE_PIN 22
 
 void platform_init(void) 
 {
@@ -29,6 +31,10 @@ void platform_init(void)
     adc_gpio_init(ADC_PIN);
     // в platform_init(): включить питание датчика
 	adc_set_temp_sensor_enabled(true);
+	// в platform_init(): GP22 на выход, на выводе ноль
+	gpio_init(CHARGE_PIN);
+    gpio_set_dir(CHARGE_PIN, GPIO_OUT);//выход
+    gpio_put(CHARGE_PIN,false);//ноль на старте
 }
 
 void platform_led_set(bool on) 
@@ -53,4 +59,10 @@ float platform_temp_read(void)
 	float adc_voltage = adc_read() * ADC_VREF_V / ADC_LEVELS;
 	float temperature = 27.0f - ((adc_voltage - 0.706f) / 0.001721f);
 	return temperature;
+}
+
+// platform_charge_set(on): 3,3 В на GP22 или ноль
+void platform_charge_set(bool on) 
+{
+    gpio_put(CHARGE_PIN, on);
 }

@@ -19,7 +19,6 @@
 // период телеметрии по умолчанию
 #define TELEMETRY_DEFAULT_PERIOD_MS 100
 
-
 static bool parse_u32(const char *text, uint32_t *value)
 {
     // strtoul приняла бы и знак: из "-1" получилось бы 4294967295
@@ -40,6 +39,18 @@ static bool parse_u32(const char *text, uint32_t *value)
 
     *value = (uint32_t)number;
     return true;
+}
+
+static void cmd_charge_on(const command_t *command) 
+{
+    platform_charge_set(true);
+    printf("charge: on\n");
+}
+
+static void cmd_charge_off(const command_t *command) 
+{
+    platform_charge_set(false);
+    printf("charge: off\n");
 }
 
 
@@ -297,7 +308,9 @@ const api_command_t api_commands[] =
     { "get_voltage", cmd_get_voltage, "voltage on GP26, ADC input 0"},
     { "get_temp", cmd_get_temp, "chip temperature, degrees Celsius"},
     { "tm_start", cmd_tm_start, "start telemetry with optional period in ms (default 100)" },
-    { "tm_stop", cmd_tm_stop, "stop telemetry" }
+    { "tm_stop", cmd_tm_stop, "stop telemetry" },
+    { "charge_on",  cmd_charge_on,  "turn on RC circuit charge (GP22 high)" },
+    { "charge_off", cmd_charge_off, "turn off RC circuit charge (GP22 low)" }
 };
 
 const uint32_t api_command_count = sizeof(api_commands) / sizeof(api_commands[0]);

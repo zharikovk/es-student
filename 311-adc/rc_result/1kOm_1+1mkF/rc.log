@@ -1,0 +1,8 @@
+R_kohm = 1
+C_uf = 2000
+tau_expected_s = 2.000
+tau_min_s = 1.520
+tau_max_s = 2.520
+tau_charge_s = 0.460
+tau_discharge_s = 1.340
+result = fail
