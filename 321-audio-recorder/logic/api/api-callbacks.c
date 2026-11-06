@@ -65,11 +65,6 @@ void api_print_telemetry(const telemetry_record_t *record)
 }
 static void cmd_tm_start(const command_t *command) 
 {
-    if (platform_adc_busy()) 
-    {
-    	printf("error: adc busy\n");
-    	return;
-    }
     uint32_t period = TELEMETRY_DEFAULT_PERIOD_MS;
     if (command->argc>1) 
     {
@@ -101,11 +96,6 @@ static void cmd_tm_stop(const command_t *command)
 
 static void cmd_get_temp(const command_t *command)
 {
-	if (platform_adc_busy()) 
-	{
-        printf("error: adc busy\n");
-        return;
-    }
 	float temp = platform_temp_read();
 	printf("temp: %.1f C\n", temp);
     return;	
@@ -113,11 +103,6 @@ static void cmd_get_temp(const command_t *command)
 
 static void cmd_get_voltage(const command_t *command)
 {
-	if (platform_adc_busy()) 
-	{
-        printf("error: adc busy\n");
-        return;
-    }
 	float voltage = platform_voltage_read();
 	printf("voltage: %.3f V\n", voltage);
     return;	
@@ -331,79 +316,7 @@ static void cmd_timer_blink_stop(const command_t *command)
     uint32_t toggles = platform_blink_stop();
     printf("timer_blink: stopped, %lu toggles\n",(unsigned long)toggles);
 }
-////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////
-static void cmd_cap_start(const command_t *command)
-{
-    uint32_t count, period_us;
 
-    //аргументов не два или не числа — error: usage cap_start <N> <period_us>
-    if (command->argc != 2 || !parse_u32(command->argv[0], &count) || !parse_u32(command->argv[1], &period_us))
-    {
-        printf("error: usage cap_start <N> <period_us>\n");
-        return;
-    }
-
-    //  N = 0, N > PLATFORM_CAPTURE_MAX или период меньше 10 мкс —
-//     error: N must be 1..2000, period_us at least 10
-    if (count == 0 || count > PLATFORM_CAPTURE_MAX || period_us < 10)
-    {
-        printf("error: N must be 1..2000, period_us at least 10\n");
-        return;
-    }
-// N = 0, N > PLATFORM_CAPTURE_MAX или период меньше 10 мкс —
-//     error: N must be 1..2000, period_us at least 10
-    if (platform_adc_busy() || !platform_capture_start(count, period_us))
-    {
-        printf("error: adc busy\n");
-        return;
-    }
-// идёт телеметрия или platform не начал захват — error: adc busy
-// ответ capture: started, <N> samples, period <период> us
-    printf("capture: started, %lu samples, period %lu us\n", (unsigned long)count, (unsigned long)period_us);
-}
-
-static void cmd_cap_dump(const command_t *command)//захвата не было — error: no capture
-{
-    if (command->argc != 0)
-    {
-        printf("error: usage cap_dump\n");
-        return;
-    }
-
-    if (!platform_capture_done())
-    {
-        printf("error: no capture\n");
-        return;
-    }
-
-
-    platform_capture_t cap;
-    platform_capture_get(&cap);
-// строка capture: <N> samples, period <период> us, interval <мин>..<макс> us, handler <доля> %
-    printf("capture: %lu samples, period %lu us, interval %lu..%lu us, handler %.1f %%\n",
-           (unsigned long)cap.count,
-           (unsigned long)cap.period_us,
-           (unsigned long)cap.min_interval_us,
-           (unsigned long)cap.max_interval_us,
-           (double)cap.handler_percent);
-
-    // вывод по 16 штук в строке
-    for (uint32_t i = 0; i < cap.count; i++)
-    {
-        if (i % 16 == 0)
-        {
-            printf("cap:");
-        }
-        printf(" %u", cap.samples[i]);
-        
-        // Перенос строки после каждых 16 элементов или в конце массива
-        if (i % 16 == 15 || i == cap.count - 1)
-        {
-            printf("\n");
-        }
-    }
-}
 const api_command_t api_commands[] = {
     {"help", cmd_help, "list of commands"},
     {"info", cmd_info, "device passport"},
@@ -425,9 +338,7 @@ const api_command_t api_commands[] = {
     {"charge_on", cmd_charge_on, "turn on RC circuit charge (GP22 high)"},
     {"charge_off", cmd_charge_off, "turn off RC circuit charge (GP22 low)"},
     {"timer_blink_start", cmd_timer_blink_start, "blink led by timer: timer_blink_start <period_ms>"},
-    {"timer_blink_stop", cmd_timer_blink_stop, "stop timer blink, number of toggles"},
- 	{"cap_start", cmd_cap_start,"start capture: cap_start <N> <period_us>"},
-    {"cap_dump", cmd_cap_dump, "dump captured samples"}
+    {"timer_blink_stop", cmd_timer_blink_stop, "stop timer blink, number of toggles"}
 };
 
 const uint32_t api_command_count = sizeof(api_commands) / sizeof(api_commands[0]);
