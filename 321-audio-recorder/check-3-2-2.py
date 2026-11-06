@@ -1,6 +1,5 @@
-# Задание 3.2.1: запускает мигание по будильнику, проверяет, что команды работают во время
-# мигания и расчёта π, останавливает мигание и пробует неверные аргументы.
-# Обмен записывается в файл device-3-2-1.log.
+# Задание 3.2.2: захватывает отсчёты по будильнику с периодом 125 и 23 мкс, выводит их
+# с разбросом интервалов и пробует неверные аргументы. Обмен — в файл device-3-2-2.log.
 
 import time
 from datetime import datetime
@@ -11,25 +10,21 @@ from serial.tools import list_ports
 VENDOR_ID = 0x2E8A
 PRODUCT_ID = 0x000A
 
-TASK = "3.2.1"
+TASK = "3.2.2"
 PROJECT = "321-audio-recorder"
-LOG_NAME = "device-3-2-1.log"
+LOG_NAME = "device-3-2-2.log"
 BACKSPACE = "\x7f"
 # Кадр команды и сколько секунд слушать ответ.
 STEPS = [
     ("\r", 0.5),
     ("help\r", 1),
     ("info\r", 1),
-    ("timer_blink_start 250\r", 1),
-    ("pi_start 3000000\r", 1),
-    ("uptime\r", 1),
-    ("info\r", 1),
-    ("pi\r", 2),
-    ("timer_blink_stop\r", 1),
-    ("timer_blink_start 100\r", 2),
-    ("timer_blink_stop\r", 1),
-    ("timer_blink_start 5\r", 0.5),
-    ("timer_blink_start\r", 0.5),
+    ("cap_start 1000 125\r", 0.5),
+    ("cap_dump\r", 1.5),
+    ("cap_start 2000 23\r", 0.5),
+    ("cap_dump\r", 2),
+    ("cap_start 0 125\r", 0.5),
+    ("cap_start 1000\r", 0.5),
 ]
 
 
