@@ -1,5 +1,5 @@
-# Задание 3.2.2: захватывает отсчёты по будильнику с периодом 125 и 23 мкс, выводит их
-# с разбросом интервалов и пробует неверные аргументы. Обмен — в файл device-3-2-2.log.
+# Задание 3.2.3: захватывает блоки отсчётов через DMA и сверяет время захвата
+# с расчётом, пробует неверные аргументы. Обмен — в файл device-3-2-3.log.
 
 import time
 from datetime import datetime
@@ -10,21 +10,22 @@ from serial.tools import list_ports
 VENDOR_ID = 0x2E8A
 PRODUCT_ID = 0x000A
 
-TASK = "3.2.2"
+TASK = "3.2.3"
 PROJECT = "321-audio-recorder"
-LOG_NAME = "device-3-2-2.log"
+LOG_NAME = "device-3-2-3.log"
 BACKSPACE = "\x7f"
 # Кадр команды и сколько секунд слушать ответ.
 STEPS = [
     ("\r", 0.5),
     ("help\r", 1),
     ("info\r", 1),
-    ("cap_start 1000 125\r", 0.5),
-    ("cap_dump\r", 1.5),
-    ("cap_start 2000 23\r", 0.5),
-    ("cap_dump\r", 2),
-    ("cap_start 0 125\r", 0.5),
-    ("cap_start 1000\r", 0.5),
+    ("dma_cap 1000\r", 0.5),
+    ("dma_cap 4410\r", 0.5),
+    ("dma_cap 8192\r", 0.5),
+    ("uptime\r", 0.5),
+    ("dma_cap 0\r", 0.5),
+    ("dma_cap 9000\r", 0.5),
+    ("dma_cap\r", 0.5),
 ]
 
 

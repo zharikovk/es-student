@@ -11,6 +11,8 @@
 #include "button-task.h"
 #include "pi-task.h"
 #include "telemetry-task.h"
+#include "block-task.h"
+
 
 typedef enum {
     STOPWATCH_LOOP,
@@ -45,6 +47,7 @@ int main() //inlet)
     profiling_stopwatch_init(STOPWATCH_TELEMETRY, "telemetry");    
     while (1)
 	{
+        block_task_handle(); 
         profiling_start(STOPWATCH_LOOP);
 
         profiling_start(STOPWATCH_COMMAND);
