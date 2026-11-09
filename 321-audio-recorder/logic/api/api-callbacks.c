@@ -12,6 +12,7 @@
 #include "pi-task.h"
 #include "telemetry-task.h"
 #include "block-task.h"
+#include "stream-task.h"
 #include <ctype.h>
 #include <errno.h>
 #include <stdlib.h>
@@ -459,7 +460,73 @@ static void cmd_dma_cap(const command_t *command)
     }
 // иначе захват с функцией print_dma_cap, ответ придёт, когда блок будет готов
 }
+////////////////////////////////////////////324
+#define STREAM_BLINK_PERIOD_MS 250
+// колбэк, который вызывается из stream_task_handle, когда буфер готов
+void on_stream_frame(const stream_header_t *header, const uint8_t *data, uint32_t bytes)
+{
+    // отправляем заголовок кадра (6 байт: синхрослово, номер, количество)
+    platform_write(header, sizeof(stream_header_t));
+// отправляем сами данные (байты или слова, в зависимости от разрядности)
+    platform_write(data, bytes);
+}
 
+static void cmd_stream_start(const command_t *command)
+{
+    uint32_t bits = 16; // По умолчанию 16 бит
+    // проверка аргументов
+    if (command->argc > 1)
+    {
+        printf("error: usage stream_start [8|16]\n");
+        return;
+    }
+    
+    if (command->argc == 1 && !parse_u32(command->argv[0], &bits))
+    {
+        printf("error: usage stream_start [8|16]\n");
+        return;
+    }
+    // Пповерка допустимой разрядности
+    if (bits != 8 && bits != 16)
+    {
+        printf("error: usage stream_start [8|16]\n");
+        return;
+    }
+    // попытка запустить поток
+    if (!stream_task_start((uint8_t)bits))
+    {
+        printf("error: adc busy\n");
+        return;
+    }
+    // ваш ответ
+    // запускаем индикатор записи (как в задании 3.2.1)
+    platform_blink_start(STREAM_BLINK_PERIOD_MS);
+    printf("stream: started, 44100 Hz, %lu bit\n", (unsigned long)bits);
+}
+
+static void cmd_stream_stop(const command_t *command)
+{
+    //команда не принимает аргументов
+    if (command->argc != 0)
+    {
+        printf("error: usage stream_stop\n");
+        return;
+    }
+    // проверка, что поток действительно запущен
+    if (stream_task_get_state() != STREAM_STATE_RUN)
+    {
+        printf("error: not running\n");
+        return;
+    }
+    //останавливаем поток и собираем статистику
+    platform_blink_stop();
+    stream_task_stop();
+    printf("stream: stopped, %lu frames, %lu samples, %lu overruns\n",
+           (unsigned long)stream_task_get_frames(),
+           (unsigned long)stream_task_get_samples(),
+           (unsigned long)stream_task_get_overruns());
+}
+///////////////////////////////////////////////
 
 const api_command_t api_commands[] = {
     {"help", cmd_help, "list of commands"},
@@ -485,7 +552,9 @@ const api_command_t api_commands[] = {
     {"timer_blink_stop", cmd_timer_blink_stop, "stop timer blink, number of toggles"},
  	{"cap_start", cmd_cap_start,"start capture: cap_start <N> <period_us>"},
     {"cap_dump", cmd_cap_dump, "dump captured samples"},
-    {"dma_cap", cmd_dma_cap,"capture block via DMA: dma_cap <N>"}
+    {"dma_cap", cmd_dma_cap,"capture block via DMA: dma_cap <N>"},
+    { "stream_start", cmd_stream_start, "start DMA stream: stream_start [8|16]" },
+    { "stream_stop", cmd_stream_stop, "stop DMA stream and show stats" }
 };
 
 const uint32_t api_command_count = sizeof(api_commands) / sizeof(api_commands[0]);

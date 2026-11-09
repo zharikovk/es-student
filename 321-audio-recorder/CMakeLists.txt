@@ -27,6 +27,7 @@ add_library(logic STATIC
     logic/pi-task/pi-task.c
     logic/telemetry-task/telemetry-task.c
     logic/block-task/block-task.c
+    logic/stream-task/stream-task.c
 )
 target_include_directories(logic PUBLIC 
     ${CMAKE_CURRENT_SOURCE_DIR}/logic/api
@@ -35,6 +36,7 @@ target_include_directories(logic PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/logic/pi-task
     ${CMAKE_CURRENT_SOURCE_DIR}/logic/telemetry-task
     ${CMAKE_CURRENT_SOURCE_DIR}/logic/block-task
+    ${CMAKE_CURRENT_SOURCE_DIR}/logic/stream-task
 )
 target_link_libraries(logic PUBLIC 
     stdio-text-protocol

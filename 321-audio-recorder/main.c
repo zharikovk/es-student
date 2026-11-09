@@ -12,7 +12,7 @@
 #include "pi-task.h"
 #include "telemetry-task.h"
 #include "block-task.h"
-
+#include "stream-task.h"
 
 typedef enum {
     STOPWATCH_LOOP,
@@ -21,7 +21,9 @@ typedef enum {
     STOPWATCH_BUTTON,
     STOPWATCH_PI,
     STOPWATCH_COUNT,
-    STOPWATCH_TELEMETRY
+    STOPWATCH_TELEMETRY,
+    STOPWATCH_BLOCK,
+    STOPWATCH_STREAM
 } stopwatch_id_t;
 
 int main() //inlet)
@@ -37,6 +39,7 @@ int main() //inlet)
     pi_task_init();
     api_init();
     telemetry_task_init(api_print_telemetry);
+    stream_task_init(on_stream_frame);//задача потока
     //profiling_init(); // запоминаем начальное показание часов для профилирования
     button_task_init(led_task_next_state);
     profiling_stopwatch_init(STOPWATCH_LOOP, "loop");
@@ -44,12 +47,12 @@ int main() //inlet)
     profiling_stopwatch_init(STOPWATCH_LED, "led");
     profiling_stopwatch_init(STOPWATCH_BUTTON, "button");
     profiling_stopwatch_init(STOPWATCH_PI, "pi");
-    profiling_stopwatch_init(STOPWATCH_TELEMETRY, "telemetry");    
+    profiling_stopwatch_init(STOPWATCH_TELEMETRY, "telemetry");
+    profiling_stopwatch_init(STOPWATCH_BLOCK, "block");  
+    profiling_stopwatch_init(STOPWATCH_STREAM, "stream");  
     while (1)
 	{
-        block_task_handle(); 
         profiling_start(STOPWATCH_LOOP);
-
         profiling_start(STOPWATCH_COMMAND);
         const command_t *command = stdio_text_protocol_handle();
         if (command != NULL) 
@@ -57,23 +60,24 @@ int main() //inlet)
             api_handle(command);
         }
         profiling_stop(STOPWATCH_COMMAND);
-
         profiling_start(STOPWATCH_LED);
 	    led_task_handle();// мигаем светодиодом
         profiling_stop(STOPWATCH_LED);
-
         profiling_start(STOPWATCH_BUTTON);
         button_task_handle();//кнопка
         profiling_stop(STOPWATCH_BUTTON);
-
         profiling_start(STOPWATCH_PI);
         pi_task_handle();///расчет пи
         profiling_stop(STOPWATCH_PI);
-
         profiling_start(STOPWATCH_TELEMETRY);
         telemetry_task_handle();
         profiling_stop(STOPWATCH_TELEMETRY);
-
+        profiling_start(STOPWATCH_BLOCK);
+        block_task_handle();
+        profiling_stop(STOPWATCH_BLOCK);
+        profiling_start(STOPWATCH_STREAM);
+        stream_task_handle();
+        profiling_stop(STOPWATCH_STREAM);
         profiling_stop(STOPWATCH_LOOP);
     }
 }

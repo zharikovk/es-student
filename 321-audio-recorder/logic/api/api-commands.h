@@ -3,6 +3,7 @@
 #pragma once
 
 #include "stdio-text-protocol/stdio-text-protocol.h"
+#include "stream-task.h"
 #include <stdint.h>
 
 // обработчик команды: получает имя и аргументы
@@ -19,3 +20,5 @@ typedef struct {
 extern const api_command_t api_commands[];
 extern const uint32_t api_command_count;
 void cmd_help(const command_t *cmd); 
+
+void on_stream_frame(const stream_header_t *header, const uint8_t *data, uint32_t bytes);
