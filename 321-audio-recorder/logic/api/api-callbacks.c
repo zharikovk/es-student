@@ -551,6 +551,54 @@ static void cmd_generate_tone(const command_t *command)
     }
 }
 //////////////////////////////////////////////////
+//  Команда для намеренного зависания (проверка работы watchdog)
+static void cmd_hang(const command_t *command)
+{
+    printf("hang: superloop stopped\n");
+
+    
+    while (1)
+    {
+        
+    }
+}
+
+
+static void cmd_wdt_enable(const command_t *command)
+{
+    uint32_t timeout_ms;
+
+    if (command->argc != 1 || !parse_u32(command->argv[0], &timeout_ms))
+    {
+        printf("error: usage wdt_enable <timeout_ms>\n");
+        return;
+    }
+
+    if (!platform_watchdog_enable(timeout_ms))
+    {
+        printf("error: timeout_ms must be 1..8388\n");
+        return;
+    }
+
+    printf("wdt: enabled, timeout %lu ms\n", (unsigned long)timeout_ms);
+}
+
+
+static void cmd_reset_reason(const command_t *command)
+{
+    uint32_t restarts = 0;
+    bool is_wdt = platform_watchdog_caused_reset(&restarts);
+
+    if (is_wdt)
+    {
+        printf("reset: watchdog, restarts %lu\n", (unsigned long)restarts);
+    }
+    else
+    {
+        printf("reset: other, restarts %lu\n", (unsigned long)restarts);
+    }
+}
+/////////////////////////////////////////////////////
 
 const api_command_t api_commands[] = {
     {"help", cmd_help, "list of commands"},
@@ -579,7 +627,10 @@ const api_command_t api_commands[] = {
     {"dma_cap", cmd_dma_cap,"capture block via DMA: dma_cap <N>"},
     { "stream_start", cmd_stream_start, "start DMA stream: stream_start [8|16]" },
     { "stream_stop", cmd_stream_stop, "stop DMA stream and show stats" },
-    { "generate_tone", cmd_generate_tone, "generate tone on GP20: generate_tone <Hz>" }
+    { "generate_tone", cmd_generate_tone, "generate tone on GP20: generate_tone <Hz>" },
+	{ "hang", cmd_hang, "hang the superloop forever to test watchdog" },
+    { "wdt_enable", cmd_wdt_enable, "enable watchdog timer: wdt_enable <timeout_ms>" },
+    { "reset_reason", cmd_reset_reason, "show last reset reason and restart count" }
 };
 
 const uint32_t api_command_count = sizeof(api_commands) / sizeof(api_commands[0]);

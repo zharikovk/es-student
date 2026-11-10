@@ -29,6 +29,11 @@ typedef enum {
 int main() //inlet)
 {
     platform_init();
+    uint32_t restarts = 0;
+    if (platform_watchdog_caused_reset(&restarts)) 
+    {
+        printf("warning: watchdog reboot, %lu restarts\n", (unsigned long)restarts);
+    }
     uint64_t start_wait = systime_ms();
     while (systime_ms() - start_wait < 1500) 
     {
@@ -78,7 +83,9 @@ int main() //inlet)
         profiling_start(STOPWATCH_STREAM);
         stream_task_handle();
         profiling_stop(STOPWATCH_STREAM);
-        profiling_stop(STOPWATCH_LOOP);
+        //profiling_stop(STOPWATCH_LOOP);
+        platform_watchdog_feed();
+		profiling_stop(STOPWATCH_LOOP);
     }
 }
 

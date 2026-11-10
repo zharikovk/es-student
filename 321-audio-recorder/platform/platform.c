@@ -6,6 +6,7 @@
 #include "hardware/irq.h"
 #include "hardware/pwm.h"
 #include "hardware/clocks.h"
+#include "hardware/watchdog.h"
 
 #define LED_PIN 25
 #define BUTTON_PIN 15
@@ -17,6 +18,10 @@
 #define CHARGE_PIN 22// вывод, через резистор заряжающий конденсатор RC-цепи
 #define TONE_PIN 20
 #define TONE_COUNT_HZ 1000000 // 1 МГц (1 тик = 1 микросекунда)
+#define WATCHDOG_MAX_MS 8388 // наибольший таймаут сторожевого таймера RP2040 (RP2040-E1)
+
+static bool watchdog_reset;
+static uint32_t watchdog_restarts;
 
 void platform_led_set(bool on) 
 {
@@ -457,8 +462,45 @@ bool platform_tone_set(uint32_t freq_hz)
     return true;
 }
 //////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////3/2/6
+bool platform_watchdog_enable(uint32_t timeout_ms)
+{
+    if (timeout_ms == 0 || timeout_ms > WATCHDOG_MAX_MS)
+    {
+        return false;
+    }
+
+    // true — не считать, пока ядро остановлено отладчиком
+    watchdog_enable(timeout_ms, true);
+    return true;
+}
+
+void platform_watchdog_feed(void)
+{
+    watchdog_update();
+}
+
+bool platform_watchdog_caused_reset(uint32_t *restarts)
+{
+    *restarts = watchdog_restarts;
+    return watchdog_reset;
+}
+///////////////////////////////////////////////////////////
 void platform_init(void) 
 {
+    // причина прошлого сброса; счётчик сбросов подряд хранит scratch-регистр 0,
+    // его не стирает сброс по сторожевому таймеру
+    watchdog_reset = watchdog_enable_caused_reboot();
+    if (watchdog_reset)
+    {
+        watchdog_hw->scratch[0]++;
+    }
+    else
+    {
+        watchdog_hw->scratch[0] = 0;
+    }
+    watchdog_restarts = watchdog_hw->scratch[0];
+    
     stdio_init_all();
     //светодиод
     gpio_init(LED_PIN);
