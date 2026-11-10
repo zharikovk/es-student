@@ -526,7 +526,31 @@ static void cmd_stream_stop(const command_t *command)
            (unsigned long)stream_task_get_samples(),
            (unsigned long)stream_task_get_overruns());
 }
-///////////////////////////////////////////////
+///////////////////////////////////////////////3/2/5
+static void cmd_generate_tone(const command_t *command)
+{
+    uint32_t freq_hz;
+    // gроверка аргументов (должен быть ровно один числовой аргумент)
+    if (command->argc != 1 || !parse_u32(command->argv[0], &freq_hz)) 
+    {
+        printf("error: usage generate_tone <Hz>\n");
+        return;
+    }
+    if (!platform_tone_set(freq_hz)) 
+    {
+        printf("error: Hz must be 0 or 20..20000\n");
+        return;
+    }
+
+    if (freq_hz == 0) 
+    {
+        printf("tone: off\n");
+    } else 
+    {
+        printf("tone: %lu Hz\n", (unsigned long)freq_hz);
+    }
+}
+//////////////////////////////////////////////////
 
 const api_command_t api_commands[] = {
     {"help", cmd_help, "list of commands"},
@@ -554,7 +578,8 @@ const api_command_t api_commands[] = {
     {"cap_dump", cmd_cap_dump, "dump captured samples"},
     {"dma_cap", cmd_dma_cap,"capture block via DMA: dma_cap <N>"},
     { "stream_start", cmd_stream_start, "start DMA stream: stream_start [8|16]" },
-    { "stream_stop", cmd_stream_stop, "stop DMA stream and show stats" }
+    { "stream_stop", cmd_stream_stop, "stop DMA stream and show stats" },
+    { "generate_tone", cmd_generate_tone, "generate tone on GP20: generate_tone <Hz>" }
 };
 
 const uint32_t api_command_count = sizeof(api_commands) / sizeof(api_commands[0]);

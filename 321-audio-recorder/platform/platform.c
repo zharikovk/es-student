@@ -4,21 +4,19 @@
 #include "hardware/adc.h"
 #include "hardware/dma.h"//DMA подключается к проекту библиотекой SDK.
 #include "hardware/irq.h"
+#include "hardware/pwm.h"
+#include "hardware/clocks.h"
 
 #define LED_PIN 25
 #define BUTTON_PIN 15
-// вход АЦП: вывод GP26, канал 0
-#define ADC_PIN 26
+#define ADC_PIN 26 // вход АЦП: вывод GP26, канал 0
 #define ADC_CHANNEL 0
-// опорное напряжение АЦП на плате Pico и число уровней 12-разрядного кода
-#define ADC_VREF_V 3.3f
+#define ADC_VREF_V 3.3f // опорное напряжение АЦП на плате Pico и число уровней 12-разрядного кода
 #define ADC_LEVELS 4096
-// встроенный датчик температуры — канал 4
-#define ADC_TEMP_CHANNEL 4
-// вывод, через резистор заряжающий конденсатор RC-цепи
-#define CHARGE_PIN 22
-
-
+#define ADC_TEMP_CHANNEL 4// встроенный датчик температуры — канал 4
+#define CHARGE_PIN 22// вывод, через резистор заряжающий конденсатор RC-цепи
+#define TONE_PIN 20
+#define TONE_COUNT_HZ 1000000 // 1 МГц (1 тик = 1 микросекунда)
 
 void platform_led_set(bool on) 
 {
@@ -431,6 +429,33 @@ uint32_t platform_stream_overruns(void)
     return stream_overruns;
 }
 ///////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////3.2.5
+bool platform_tone_set(uint32_t freq_hz)
+{
+    uint slice_num = pwm_gpio_to_slice_num(TONE_PIN);
+    uint chan = pwm_gpio_to_channel(TONE_PIN);
+
+    // Если частота 0, просто ставим уровень в 0 (на выходе будет 0В), модуль не выключаем
+    if (freq_hz == 0) 
+    {
+        pwm_set_chan_level(slice_num, chan, 0);
+        return true;
+    }
+
+    // вне 20..20000 Гц — false
+    if (freq_hz < 20 || freq_hz > 20000) 
+    {
+        return false;
+    }
+    // Расчёт параметров для меандра (скважность 50%)
+    // Период в микросекундах = 1 000 000 / freq_hz
+    uint32_t period_us = TONE_COUNT_HZ / freq_hz;
+    uint32_t wrap = period_us - 1;// период в микросекундах 1 000 000 / freq_hz, wrap — период минус 1,
+    uint32_t level = period_us / 2;//порог — половина периода
+    pwm_set_wrap(slice_num, wrap);
+    pwm_set_chan_level(slice_num, chan, level);
+    return true;
+}
 //////////////////////////////////////////////////////////
 void platform_init(void) 
 {
@@ -462,6 +487,16 @@ void platform_init(void)
 	irq_set_exclusive_handler(DMA_IRQ_0, on_stream_buffer);
 	irq_set_enabled(DMA_IRQ_0, true);
     
+    // инициализация генератора тона на GP20
+    gpio_set_function(TONE_PIN, GPIO_FUNC_PWM);
+    uint slice_num = pwm_gpio_to_slice_num(TONE_PIN);
+    // настраиваем делитель так, чтобы счётчик тикал ровно 1 000 000 раз в секунду
+    float div = (float)clock_get_hz(clk_sys) / TONE_COUNT_HZ;
+    pwm_set_clkdiv(slice_num, div);
+    // изначально тон выключен: порог (level) = 0, модуль включён
+    pwm_set_wrap(slice_num, 1000); // любое начальное значение wrap
+    pwm_set_chan_level(slice_num, pwm_gpio_to_channel(TONE_PIN), 0);
+    pwm_set_enabled(slice_num, true);
 }
 
 ////////////////////////////////////////////////////
