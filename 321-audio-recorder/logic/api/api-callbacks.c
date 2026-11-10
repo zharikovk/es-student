@@ -599,7 +599,7 @@ static void cmd_reset_reason(const command_t *command)
     }
 }
 /////////////////////////////////////////////////////
-static void cmd_version(const api_command_t *command)
+static void cmd_version(const command_t *command)
 {
     printf("version: 1.0.0\n");
 }

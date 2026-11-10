@@ -3,84 +3,85 @@
 устройство: 2e8a:000a
 серийный номер: 5054316550735B9C
 порт: /dev/ttyACM0
-начало: 2026-11-10T22:24:04
+начало: 2026-11-10T22:51:16
    0.000 --> 
-   0.502 --> help
+   0.503 --> help
    0.504 <-- help
-   0.504 <-- help             list of commands
-   0.504 <-- info             device passport
-   0.504 <-- uptime           time since reset
-   0.504 <-- pi_start         calculate pi: pi_start [terms]
-   0.504 <-- pi               pi calculation result or 'busy'
-   0.504 <-- profiling        superloop iteration: average and maximum
-   0.504 <-- profiling_reset  reset profiling
-   0.504 <-- led_enable       turn LED on
-   0.504 <-- led_disable      turn LED off
-   0.504 <-- led_blink        start LED blinkin
-   0.504 <-- led_period       set blink period in ms: led_period <ms>
-   0.504 <-- button           show button state and press count
-   0.505 <-- get_voltage      voltage on GP26, ADC input 0
-   0.505 <-- get_temp         chip temperature, degrees Celsius
-   0.505 <-- tm_start         start telemetry with optional period in ms (default 100)
-   0.505 <-- tm_stop          stop telemetry
-   0.505 <-- charge_on        turn on RC circuit charge (GP22 high)
-   0.505 <-- charge_off       turn off RC circuit charge (GP22 low)
-   0.506 <-- timer_blink_start blink led by timer: timer_blink_start <period_ms>
-   0.506 <-- timer_blink_stop stop timer blink, number of toggles
-   0.506 <-- cap_start        start capture: cap_start <N> <period_us>
-   0.506 <-- cap_dump         dump captured samples
-   0.506 <-- dma_cap          capture block via DMA: dma_cap <N>
-   0.506 <-- stream_start     start DMA stream: stream_start [8|16]
-   0.506 <-- stream_stop      stop DMA stream and show stats
-   0.506 <-- generate_tone    generate tone on GP20: generate_tone <Hz>
-   0.556 <-- hang             hang the superloop forever to test watchdog
-   0.556 <-- wdt_enable       enable watchdog timer: wdt_enable <timeout_ms>
-   0.556 <-- reset_reason     show last reset reason and restart count
-   1.510 --> info
-   1.560 <-- info
-   1.560 <-- name: es-recorder
-   1.560 <-- version: 1.0.0
-   1.560 <-- project: 321-audio-recorder
-   1.560 <-- repo: https://github.com/zharikovk/es-student
-   1.560 <-- board: pico
-   1.560 <-- serial: 5054316550735B9C
-   1.560 <-- chip: manufacturer 0x927, part 0x0002, revision 2
-   1.560 <-- pico-sdk: 2.3.0
-   2.513 --> reset_reason
-   2.563 <-- reset_reason
-   2.563 <-- reset: other, restarts 0
-   3.015 --> wdt_enable 9000
-   3.065 <-- wdt_enable 9000
-   3.065 <-- error: timeout_ms must be 1..8388
-   3.516 --> wdt_enable 2000
-   3.567 <-- wdt_enable 2000
-   3.567 <-- wdt: enabled, timeout 2000 ms
-   4.019 --> uptime
-   4.069 <-- uptime
-   4.069 <-- uptime: 25952 ms
+   0.505 <-- help             list of commands
+   0.505 <-- version          show firmware version
+   0.505 <-- info             device passport
+   0.505 <-- uptime           time since reset
+   0.506 <-- pi_start         calculate pi: pi_start [terms]
+   0.506 <-- pi               pi calculation result or 'busy'
+   0.506 <-- profiling        superloop iteration: average and maximum
+   0.506 <-- profiling_reset  reset profiling
+   0.506 <-- led_enable       turn LED on
+   0.506 <-- led_disable      turn LED off
+   0.506 <-- led_blink        start LED blinkin
+   0.507 <-- led_period       set blink period in ms: led_period <ms>
+   0.507 <-- button           show button state and press count
+   0.507 <-- get_voltage      voltage on GP26, ADC input 0
+   0.507 <-- get_temp         chip temperature, degrees Celsius
+   0.507 <-- tm_start         start telemetry with optional period in ms (default 100)
+   0.507 <-- tm_stop          stop telemetry
+   0.507 <-- charge_on        turn on RC circuit charge (GP22 high)
+   0.507 <-- charge_off       turn off RC circuit charge (GP22 low)
+   0.507 <-- timer_blink_start blink led by timer: timer_blink_start <period_ms>
+   0.507 <-- timer_blink_stop stop timer blink, number of toggles
+   0.507 <-- cap_start        start capture: cap_start <N> <period_us>
+   0.507 <-- cap_dump         dump captured samples
+   0.507 <-- dma_cap          capture block via DMA: dma_cap <N>
+   0.507 <-- stream_start     start DMA stream: stream_start [8|16]
+   0.507 <-- stream_stop      stop DMA stream and show stats
+   0.557 <-- generate_tone    generate tone on GP20: generate_tone <Hz>
+   0.557 <-- hang             hang the superloop forever to test watchdog
+   0.557 <-- wdt_enable       enable watchdog timer: wdt_enable <timeout_ms>
+   0.557 <-- reset_reason     show last reset reason and restart count
+   1.511 --> info
+   1.561 <-- info
+   1.561 <-- name: es-recorder
+   1.561 <-- version: 1.0.0
+   1.561 <-- project: 321-audio-recorder
+   1.561 <-- repo: https://github.com/zharikovk/es-student
+   1.561 <-- board: pico
+   1.561 <-- serial: 5054316550735B9C
+   1.561 <-- chip: manufacturer 0x927, part 0x0002, revision 2
+   1.561 <-- pico-sdk: 2.3.0
+   2.515 --> reset_reason
+   2.565 <-- reset_reason
+   2.565 <-- reset: other, restarts 0
+   3.017 --> wdt_enable 9000
+   3.067 <-- wdt_enable 9000
+   3.067 <-- error: timeout_ms must be 1..8388
+   3.519 --> wdt_enable 2000
+   3.569 <-- wdt_enable 2000
+   3.569 <-- wdt: enabled, timeout 2000 ms
+   4.022 --> uptime
+   4.072 <-- uptime
+   4.072 <-- uptime: 107298 ms
    7.032 --> uptime
-   7.082 <-- uptime
-   7.082 <-- uptime: 28965 ms
+   7.083 <-- uptime
+   7.083 <-- uptime: 110309 ms
    7.534 --> hang
-   7.584 <-- hang
-   7.584 <-- hang: superloop stopped
-   8.539 --- ждём перезапуска платы
-  10.512 --- плата снова на связи
-  10.512 --> reset_reason
-  11.068 --> uptime
-  11.118 <-- inf main:41 device: es-recorder 1.0.0
-  11.118 <-- reset_reason
-  11.118 <-- reset: watchdog, restarts 1
-  11.118 <-- uptime
-  11.118 <-- uptime: 1503 ms
-  11.570 --> info
-  11.620 <-- info
-  11.620 <-- name: es-recorder
-  11.620 <-- version: 1.0.0
-  11.620 <-- project: 321-audio-recorder
-  11.620 <-- repo: https://github.com/zharikovk/es-student
-  11.620 <-- board: pico
-  11.620 <-- serial: 5054316550735B9C
-  11.620 <-- chip: manufacturer 0x927, part 0x0002, revision 2
-  11.620 <-- pico-sdk: 2.3.0
-итог: отправлено кадров 12, принято строк 65
+   7.585 <-- hang
+   7.585 <-- hang: superloop stopped
+   8.541 --- ждём перезапуска платы
+  10.601 --- плата снова на связи
+  10.601 --> reset_reason
+  11.105 <-- inf main:41 device: es-recorder 1.0.0
+  11.105 <-- reset_reason
+  11.105 <-- reset: watchdog, restarts 1
+  11.105 --> uptime
+  11.155 <-- uptime
+  11.155 <-- uptime: 1539 ms
+  11.607 --> info
+  11.657 <-- info
+  11.657 <-- name: es-recorder
+  11.657 <-- version: 1.0.0
+  11.657 <-- project: 321-audio-recorder
+  11.657 <-- repo: https://github.com/zharikovk/es-student
+  11.657 <-- board: pico
+  11.657 <-- serial: 5054316550735B9C
+  11.657 <-- chip: manufacturer 0x927, part 0x0002, revision 2
+  11.657 <-- pico-sdk: 2.3.0
+итог: отправлено кадров 12, принято строк 66
