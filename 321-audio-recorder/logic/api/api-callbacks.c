@@ -599,9 +599,14 @@ static void cmd_reset_reason(const command_t *command)
     }
 }
 /////////////////////////////////////////////////////
+static void cmd_version(const api_command_t *command)
+{
+    printf("version: 1.0.0\n");
+}
 
 const api_command_t api_commands[] = {
     {"help", cmd_help, "list of commands"},
+    {"version", cmd_version, "show firmware version"},
     {"info", cmd_info, "device passport"},
     {"uptime", cmd_uptime, "time since reset"},
     {"pi_start", cmd_pi_start, "calculate pi: pi_start [terms]"},
