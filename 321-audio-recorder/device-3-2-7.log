@@ -1,0 +1,70 @@
+задание: 3.2.7
+проект: 321-audio-recorder
+устройство: 2e8a:000a
+серийный номер: 5054316550735B9C
+порт: /dev/ttyACM0
+начало: 2026-11-13T22:23:38
+   0.000 --> 
+   0.504 --> help
+   0.505 <-- help
+   0.505 <-- help             list of commands
+   0.505 <-- version          show firmware version
+   0.505 <-- info             device passport
+   0.505 <-- uptime           time since reset
+   0.505 <-- pi_start         calculate pi: pi_start [terms]
+   0.505 <-- pi               pi calculation result or 'busy'
+   0.506 <-- profiling        superloop iteration: average and maximum
+   0.506 <-- profiling_reset  reset profiling
+   0.506 <-- led_enable       turn LED on
+   0.506 <-- led_disable      turn LED off
+   0.506 <-- led_blink        start LED blinkin
+   0.506 <-- led_period       set blink period in ms: led_period <ms>
+   0.506 <-- button           show button state and press count
+   0.506 <-- get_voltage      voltage on GP26, ADC input 0
+   0.506 <-- get_temp         chip temperature, degrees Celsius
+   0.506 <-- tm_start         start telemetry with optional period in ms (default 100)
+   0.506 <-- tm_stop          stop telemetry
+   0.507 <-- charge_on        turn on RC circuit charge (GP22 high)
+   0.507 <-- charge_off       turn off RC circuit charge (GP22 low)
+   0.507 <-- timer_blink_start blink led by timer: timer_blink_start <period_ms>
+   0.507 <-- timer_blink_stop stop timer blink, number of toggles
+   0.507 <-- cap_start        start capture: cap_start <N> <period_us>
+   0.507 <-- cap_dump         dump captured samples
+   0.507 <-- dma_cap          capture block via DMA: dma_cap <N>
+   0.507 <-- stream_start     start DMA stream: stream_start [8|16]
+   0.507 <-- stream_stop      stop DMA stream and show stats
+   0.508 <-- generate_tone    generate tone on GP20: generate_tone <Hz>
+   0.508 <-- hang             hang the superloop forever to test watchdog
+   0.508 <-- wdt_enable       enable watchdog timer: wdt_enable <timeout_ms>
+   0.508 <-- reset_reason     show last reset reason and restart count
+   0.558 <-- mic_bias         measure microphone DC bias
+   0.558 <-- mic_level        measure microphone AC level: mic_level [<ms>]
+   1.513 --> info
+   1.563 <-- info
+   1.563 <-- name: es-recorder
+   1.563 <-- version: 1.0.0
+   1.563 <-- project: 321-audio-recorder
+   1.563 <-- repo: https://github.com/zharikovk/es-student
+   1.563 <-- board: pico
+   1.563 <-- serial: 5054316550735B9C
+   1.563 <-- chip: manufacturer 0x927, part 0x0002, revision 2
+   1.564 <-- pico-sdk: 2.3.0
+   2.519 --> mic_bias
+   2.570 <-- mic_bias
+   2.670 <-- mic: bias 1.243 V
+   3.023 --> mic_level
+   3.073 <-- mic_level
+   3.174 <-- mic: level 4.8 mV rms, peak 18.5 mV, 100 ms
+   3.525 --> mic_level 50
+   3.576 <-- mic_level 50
+   3.626 <-- mic: level 5.3 mV rms, peak 18.5 mV, 50 ms
+   4.028 --> mic_level 185
+   4.079 <-- mic_level 185
+   4.230 <-- mic: level 5.0 mV rms, peak 19.3 mV, 184 ms
+   4.532 --> mic_level 0
+   4.582 <-- mic_level 0
+   4.582 <-- error: ms must be 1..185
+   5.035 --> mic_level 200
+   5.086 <-- mic_level 200
+   5.086 <-- error: ms must be 1..185
+итог: отправлено кадров 9, принято строк 54

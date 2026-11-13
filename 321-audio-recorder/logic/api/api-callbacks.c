@@ -18,6 +18,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <math.h>
+#define MIC_DEFAULT_WINDOW_MS 100
 // период телеметрии по умолчанию
 #define TELEMETRY_DEFAULT_PERIOD_MS 100
 
@@ -603,6 +605,106 @@ static void cmd_version(const command_t *command)
 {
     printf("version: 1.0.0\n");
 }
+//////////////////////////////////////////////327//
+// среднее и отклонение от среднего в кодах АЦП: среднеквадратичное и наибольшее
+static void block_stats(const uint16_t *samples, uint32_t count, float *mean, float *rms, float *peak)
+{
+    uint32_t sum = 0;
+    for (uint32_t i = 0; i < count; i++)
+    {
+        sum += samples[i];
+    }
+    int32_t center = (int32_t)(sum / count);
+
+    // в целых числах: в float на 8192 отсчётах ядро считало бы в 24 раза дольше
+    uint64_t squares = 0;
+    uint32_t largest = 0;
+    for (uint32_t i = 0; i < count; i++)
+    {
+        int32_t deviation = (int32_t)samples[i] - center;
+        uint32_t size = deviation < 0 ? -deviation : deviation;
+        squares += (uint64_t)(deviation * deviation);
+        if (size > largest)
+        {
+            largest = size;
+        }
+    }
+
+    *mean = (float)sum / count;
+    *rms = sqrtf((float)squares / count);
+    *peak = (float)largest;
+}
+
+static bool start_block(uint32_t count, block_task_callback_t callback)
+{
+    if (!block_task_start(count, callback)) 
+    {
+        printf("error: adc busy\n");
+        return false;
+    }
+    return true;
+}
+static void print_mic_bias(const uint16_t *samples, uint32_t count, uint32_t time_us)
+{
+    float mean, rms, peak;
+    block_stats(samples, count, &mean, &rms, &peak);
+    
+    float volts = platform_adc_volts(mean);
+    printf("mic: bias %.3f V\n", (double)volts);
+}
+
+static void cmd_mic_bias(const command_t *command)
+{
+    if (command->argc != 0) 
+    {
+        printf("error: usage mic_bias\n");
+        return;
+    }
+    start_block(4410, print_mic_bias);
+}
+
+
+static void print_mic_level(const uint16_t *samples, uint32_t count, uint32_t time_us)
+{
+    float mean, rms, peak;
+    block_stats(samples, count, &mean, &rms, &peak);
+    float rms_mv = platform_adc_volts(rms) * 1000.0f;
+    float peak_mv = platform_adc_volts(peak) * 1000.0f;
+    
+    uint32_t window_ms = (count * 1000) / 44100;
+    
+    printf("mic: level %.1f mV rms, peak %.1f mV, %lu ms\n", 
+           (double)rms_mv, (double)peak_mv, (unsigned long)window_ms);
+}
+
+static void cmd_mic_level(const command_t *command)
+{
+    uint32_t ms = MIC_DEFAULT_WINDOW_MS;
+
+    if (command->argc > 1) 
+    {
+        printf("error: usage mic_level [<ms>]\n");
+        return;
+    }
+
+    if (command->argc == 1) 
+    {
+        if (!parse_u32(command->argv[0], &ms)) 
+        {
+            printf("error: usage mic_level [<ms>]\n");
+            return;
+        }
+    }
+    if (ms == 0 || ms > 185) 
+    {
+        printf("error: ms must be 1..185\n");
+        return;
+    }
+    uint64_t count_u64 = (uint64_t)ms * 44100 / 1000;
+    
+    start_block((uint32_t)count_u64, print_mic_level);
+}
+/////////////////////////////////////////////////////
 
 const api_command_t api_commands[] = {
     {"help", cmd_help, "list of commands"},
@@ -630,12 +732,14 @@ const api_command_t api_commands[] = {
  	{"cap_start", cmd_cap_start,"start capture: cap_start <N> <period_us>"},
     {"cap_dump", cmd_cap_dump, "dump captured samples"},
     {"dma_cap", cmd_dma_cap,"capture block via DMA: dma_cap <N>"},
-    { "stream_start", cmd_stream_start, "start DMA stream: stream_start [8|16]" },
-    { "stream_stop", cmd_stream_stop, "stop DMA stream and show stats" },
-    { "generate_tone", cmd_generate_tone, "generate tone on GP20: generate_tone <Hz>" },
-	{ "hang", cmd_hang, "hang the superloop forever to test watchdog" },
-    { "wdt_enable", cmd_wdt_enable, "enable watchdog timer: wdt_enable <timeout_ms>" },
-    { "reset_reason", cmd_reset_reason, "show last reset reason and restart count" }
+    {"stream_start", cmd_stream_start, "start DMA stream: stream_start [8|16]" },
+    {"stream_stop", cmd_stream_stop, "stop DMA stream and show stats" },
+    {"generate_tone", cmd_generate_tone, "generate tone on GP20: generate_tone <Hz>" },
+	{"hang", cmd_hang, "hang the superloop forever to test watchdog" },
+    {"wdt_enable", cmd_wdt_enable, "enable watchdog timer: wdt_enable <timeout_ms>" },
+    {"reset_reason", cmd_reset_reason, "show last reset reason and restart count" },
+    {"mic_bias", cmd_mic_bias, "measure microphone DC bias"},
+    {"mic_level", cmd_mic_level, "measure microphone AC level: mic_level [<ms>]"}
 };
 
 const uint32_t api_command_count = sizeof(api_commands) / sizeof(api_commands[0]);
