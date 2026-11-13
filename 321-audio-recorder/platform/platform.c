@@ -233,10 +233,10 @@ static volatile bool block_ready;
 
 // АЦП в непрерывном режиме с шагом 44,1 кГц, буфер АЦП с запросом DMA
 // на каждый отсчёт
-static void adc_free_running(void)
+static void adc_free_running(bool shift)
 {
     adc_select_input(ADC_CHANNEL);
-    adc_fifo_setup(true, true, 1, false, false);
+    adc_fifo_setup(true, true, 1, false, shift);
     adc_set_clkdiv(ADC_CLOCK_HZ / PLATFORM_SAMPLE_RATE_HZ - 1);
 }
 
@@ -266,7 +266,7 @@ bool platform_block_start(uint32_t count)
         return false;
     }
 
-    adc_free_running();
+    adc_free_running(false);
 
     // 16-битные передачи из одного адреса в растущий, по запросу АЦП
     dma_channel_config cfg = dma_channel_get_default_config(block_channel);
@@ -338,7 +338,7 @@ bool platform_stream_start(uint8_t bits)
         return false;
     }
 
-   adc_free_running();
+    adc_free_running(bits == 8);
 
     // Настраиваем размер сэмпла и количество сэмплов в буфере в зависимости от битности
     enum dma_channel_transfer_size dma_size = (bits == 8) ? DMA_SIZE_8 : DMA_SIZE_16;
