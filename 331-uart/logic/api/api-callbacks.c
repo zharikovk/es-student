@@ -396,9 +396,11 @@ static void print_link_forth(const uint8_t *data, size_t size, uint32_t errors)
     printf(" ");
     print_errors(errors);
     
-    // Сразу запускаем обратный обмен. Задача уже в IDLE, поэтому примет вызов.
-    const uint8_t text[] = "link";
-    uart_task_start(PLATFORM_UART1, PLATFORM_UART0, text, 4, print_link_back);
+    // 
+    //const uint8_t text[] = "link";
+    //uart_task_start(PLATFORM_UART1, PLATFORM_UART0, text, 4, print_link_back);
+    uart_task_start(PLATFORM_UART1, PLATFORM_UART0, data, size, print_link_back);
+
 }
 // с принятыми байтами и функцией print_link_back
 // print_link_back(): 1->0: <принятое> <признаки>
