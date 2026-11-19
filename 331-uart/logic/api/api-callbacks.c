@@ -378,6 +378,132 @@ static void cmd_echo(const command_t *command)
 // строка длиннее 32 символов — error: text longer than 32
 // задача не приняла обмен — error: uart is busy
 // иначе обмен UART0 → UART0 с функцией print_echo
+/////////////////////////////////333
+// строка команды text: ровно 32 символа, столько же мест в очереди приёма
+static const char text_line[] = "0123456789ABCDEFGHIJKLMNOPQRSTUV";
+static void print_link_back(const uint8_t *data, size_t size, uint32_t errors) 
+{
+    printf("1->0: ");
+    print_bytes(data, size);
+    printf(" ");
+    print_errors(errors);
+}
+// print_link_forth(): 0->1: <принятое> <признаки>, затем обмен UART1 → UART0
+static void print_link_forth(const uint8_t *data, size_t size, uint32_t errors) 
+{
+    printf("0->1: ");
+    print_bytes(data, size);
+    printf(" ");
+    print_errors(errors);
+    
+    // Сразу запускаем обратный обмен. Задача уже в IDLE, поэтому примет вызов.
+    const uint8_t text[] = "link";
+    uart_task_start(PLATFORM_UART1, PLATFORM_UART0, text, 4, print_link_back);
+}
+// с принятыми байтами и функцией print_link_back
+// print_link_back(): 1->0: <принятое> <признаки>
+// cmd_link(): проверки аргумента как у echo, обмен UART0 → UART1 с print_link_forth
+static void cmd_link(const command_t *command) 
+{
+    if (command->argc != 1) 
+    {
+        printf("error: usage link <text>\n");
+        return;
+    }
+    
+    const char *text = command->argv[0];
+    size_t len = strlen(text);
+    
+    if (len > 32) 
+    {
+        printf("error: text longer than 32\n");
+        return;
+    }
+
+    if (!uart_task_start(PLATFORM_UART0, PLATFORM_UART1, (const uint8_t *)text, len, print_link_forth)) 
+    {
+        printf("error: uart is busy\n");
+    }
+}
+// cmd_baud_shift(): аргумент не одно целое число — error: usage baud_shift <percent>
+// процент вне −50..50 — error: percent must be -50..50
+// скорость UART1 = 115200 * (100 + процент) / 100,
+// ответ baud_shift: uart1 <скорость из platform_uart_baud_set()> baud
+static void cmd_baud_shift(const command_t *command) 
+{
+    if (command->argc != 1) 
+    {
+        printf("error: usage baud_shift <percent>\n");
+        return;
+    }
+    char *endptr;
+    long percent = strtol(command->argv[0], &endptr, 10); 
+    // процент вне −50..50 — error: percent must be -50..50
+    if (*endptr != '\0' || percent < -50 || percent > 50) 
+    {
+        printf("error: percent must be -50..50\n");
+        return;
+    }
+    // скорость UART1 = 115200 * (100 + процент) / 100
+    uint32_t new_baud = 115200 * (100 + (uint32_t)percent) / 100; 
+    // ответ baud_shift: uart1 <скорость из platform_uart_baud_set()> baud
+    uint32_t actual_baud = platform_uart_baud_set(PLATFORM_UART1, new_baud);
+    printf("baud_shift: uart1 %lu baud\n", (unsigned long)actual_baud);
+}
+// print_text(): text: <число байтов> chars <принятое> <признаки>
+static void print_text(const uint8_t *data, size_t size, uint32_t errors) 
+{
+    printf("text: %zu chars ", size);
+    print_bytes(data, size);
+    printf(" ");
+    print_errors(errors);
+}
+// cmd_text(): обмен UART1 → UART0 со строкой text_line и функцией print_text
+static void cmd_text(const command_t *command) 
+{
+    if (command->argc != 0) 
+    {
+        printf("error: usage text\n");
+        return;
+    }
+    
+    // text_line имеет длину 32. sizeof даст 33 из-за '\0', поэтому передаём ровно 32
+    if (!uart_task_start(PLATFORM_UART1, PLATFORM_UART0, (const uint8_t *)text_line, 32, print_text)) 
+    {
+        printf("error: uart is busy\n");
+    }
+}
+// cmd_parity(): два аргумента из none, even, odd, иначе
+// error: usage parity none|even|odd none|even|odd
+// первый — UART0, приёмник text, второй — UART1, передатчик text,
+// ответ parity: uart0 <первый>, uart1 <второй>
+static void cmd_parity(const command_t *command) 
+{
+    if (command->argc != 2) 
+    {
+        printf("error: usage parity none|even|odd none|even|odd\n");
+        return;
+    }
+
+    const char *arg0 = command->argv[0]; // для UART0 (приёмник)
+    const char *arg1 = command->argv[1]; // для UART1 (передатчик)
+
+    // Вызываем функции platform (убедись, что они реализованы в platform.c!)
+	platform_parity_t p0 = PLATFORM_PARITY_NONE; 
+    if (strcmp(arg0, "even") == 0) p0 = PLATFORM_PARITY_EVEN;
+    else if (strcmp(arg0, "odd") == 0) p0 = PLATFORM_PARITY_ODD;
+
+    platform_parity_t p1 = PLATFORM_PARITY_NONE;
+    if (strcmp(arg1, "even") == 0) p1 = PLATFORM_PARITY_EVEN;
+    else if (strcmp(arg1, "odd") == 0) p1 = PLATFORM_PARITY_ODD;
+
+    // Теперь передаём правильный тип enum
+    platform_uart_parity_set(PLATFORM_UART0, p0);
+    platform_uart_parity_set(PLATFORM_UART1, p1);
+
+    printf("parity: uart0 %s, uart1 %s\n", arg0, arg1);
+}
+
 /////////////////////////////////
 const api_command_t api_commands[] = 
 {
@@ -395,7 +521,11 @@ const api_command_t api_commands[] =
     {"button",  cmd_button,  "show button state and press count"},
     {"edge", cmd_edge , "rise and fall of the RC line: edge pp|od"},
     {"loop", cmd_loop, "UART0 loopback: loop internal|pins" },
-	{"echo", cmd_echo, "text through UART0 and back: echo <text>" }
+	{"echo", cmd_echo, "text through UART0 and back: echo <text>" },
+	{"link", cmd_link , "text from UART0 to UART1 and back: link <text>"},
+	{"baud_shift", cmd_baud_shift, "shift UART1 baud rate: baud_shift <percent>" },
+	{"text", cmd_text, "32 characters from UART1 to UART0" },
+	{"parity", cmd_parity, "parity of UART0 and UART1: parity <rx> <tx>" }
 };
 
 const uint32_t api_command_count = sizeof(api_commands) / sizeof(api_commands[0]);

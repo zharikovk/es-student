@@ -18,7 +18,9 @@
 #define UART0_TX_PIN 0
 #define UART0_RX_PIN 1
 #define UART_BAUD 115200
-
+// выводы модуля UART1
+#define UART1_TX_PIN 8
+#define UART1_RX_PIN 9
 
 static uart_inst_t *uart_of(platform_uart_t uart)
 {
@@ -127,6 +129,28 @@ float platform_voltage_read(void)
 }
 
 
+
+
+
+uint32_t platform_uart_baud_set(platform_uart_t uart, uint32_t baud)
+{
+    return uart_set_baudrate(uart_of(uart), baud);
+}
+
+void platform_uart_parity_set(platform_uart_t uart, platform_parity_t parity)
+{
+    static const uart_parity_t parities[] = {
+        UART_PARITY_NONE,
+        UART_PARITY_EVEN,
+        UART_PARITY_ODD,
+    };
+
+    uart_set_format(uart_of(uart), 8, 1, parities[parity]);
+}
+
+
+
+
 void platform_init(void) 
 {
     stdio_init_all();
@@ -163,4 +187,7 @@ void platform_init(void)
     uart_init(uart0, UART_BAUD);
     platform_uart_loop_set(false);
 
+	uart_init(uart1, UART_BAUD);
+    gpio_set_function(UART1_TX_PIN, GPIO_FUNC_UART);
+    gpio_set_function(UART1_RX_PIN, GPIO_FUNC_UART);
 }
