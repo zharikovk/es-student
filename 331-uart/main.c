@@ -11,6 +11,7 @@
 #include "button-task.h"
 #include "pi-task.h"
 #include "edge-task.h"
+#include "uart-task.h"
 
 
 typedef enum {
@@ -20,7 +21,8 @@ typedef enum {
     STOPWATCH_BUTTON,
     STOPWATCH_PI,
     STOPWATCH_COUNT,
-    STOPWATCH_EDGE
+    STOPWATCH_EDGE,
+    STOPWATCH_UART
 } stopwatch_id_t;
 
 int main() //inlet)
@@ -44,7 +46,7 @@ int main() //inlet)
     profiling_stopwatch_init(STOPWATCH_BUTTON, "button");
     profiling_stopwatch_init(STOPWATCH_PI, "pi");
     profiling_stopwatch_init(STOPWATCH_EDGE, "edge");
-       
+    profiling_stopwatch_init(STOPWATCH_UART, "uart");   
     while (1)
 	{
         profiling_start(STOPWATCH_LOOP);
@@ -71,6 +73,11 @@ int main() //inlet)
         profiling_start(STOPWATCH_EDGE);
         edge_task_handle();
         profiling_stop(STOPWATCH_EDGE);
+        
+        profiling_start(STOPWATCH_UART);
+        uart_task_handle();
+        profiling_stop(STOPWATCH_UART);
+        
         profiling_stop(STOPWATCH_LOOP);
     }
 }

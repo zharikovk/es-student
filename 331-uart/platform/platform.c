@@ -2,6 +2,7 @@
 #include "platform.h"          
 #include "pico/stdlib.h"    
 #include "hardware/adc.h"
+#include "hardware/uart.h"
 //#include <stdio.h>
 
 #define LED_PIN 25
@@ -12,6 +13,83 @@
 // опорное напряжение АЦП на плате Pico и число уровней 12-разрядного кода
 #define ADC_VREF_V 3.3f
 #define ADC_LEVELS 4096.0f
+
+// выводы модуля UART0
+#define UART0_TX_PIN 0
+#define UART0_RX_PIN 1
+#define UART_BAUD 115200
+
+
+static uart_inst_t *uart_of(platform_uart_t uart)
+{
+    return uart == PLATFORM_UART0 ? uart0 : uart1;
+}
+
+void platform_uart_loop_set(bool internal)
+{
+    uint function = internal ? GPIO_FUNC_NULL : GPIO_FUNC_UART;
+    gpio_set_function(UART0_TX_PIN, function);
+    gpio_set_function(UART0_RX_PIN, function);
+
+    if (internal)
+    {
+        hw_set_bits(&uart_get_hw(uart0)->cr, UART_UARTCR_LBE_BITS);
+    }
+    else
+    {
+        hw_clear_bits(&uart_get_hw(uart0)->cr, UART_UARTCR_LBE_BITS);
+    }
+}
+
+void platform_uart_clear(platform_uart_t uart)
+{
+    uart_inst_t *u = uart_of(uart);
+
+    while (uart_is_readable(u))
+    {
+        (void)uart_get_hw(u)->dr;
+    }
+
+    // запись в UARTECR сбрасывает признаки ошибок
+    uart_get_hw(u)->rsr = 0;
+}
+
+bool platform_uart_put(platform_uart_t uart, uint8_t byte)
+{
+    uart_inst_t *u = uart_of(uart);
+
+    if (!uart_is_writable(u))
+    {
+        return false;
+    }
+
+    // место в очереди есть, поэтому uart_putc_raw() не ждёт
+    uart_putc_raw(u, byte);
+    return true;
+}
+
+bool platform_uart_busy(platform_uart_t uart)
+{
+    return uart_get_hw(uart_of(uart))->fr & UART_UARTFR_BUSY_BITS;
+}
+
+size_t platform_uart_read(platform_uart_t uart, uint8_t *data, size_t size)
+{
+    uart_inst_t *u = uart_of(uart);
+    size_t n = 0;
+
+    while (uart_is_readable(u) && n < size)
+    {
+        data[n++] = uart_get_hw(u)->dr & 0xff;
+    }
+
+    return n;
+}
+
+uint32_t platform_uart_errors(platform_uart_t uart)
+{
+    return uart_get_hw(uart_of(uart))->rsr & 0xf;
+}
 
 
 
@@ -80,5 +158,9 @@ void platform_init(void)
 //    sleep_ms(100); // конденсатор разрядился
  //   float v_low = platform_voltage_read();
 //    printf("DEBUG INIT: Voltage AFTER FORCE LOW = %.3f V (ОЖИДАЕТСЯ ~0.000)\n", v_low);
+	
+	// делитель, формат 8N1, очереди, включение модуля
+    uart_init(uart0, UART_BAUD);
+    platform_uart_loop_set(false);
 
 }

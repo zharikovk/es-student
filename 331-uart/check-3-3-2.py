@@ -1,9 +1,7 @@
-# Задание 3.3.1: измеряет фронты линии RC-цепи в двухтактном режиме и в режиме
-# открытого стока с внутренней подтяжкой, пробует неверные аргументы.
-# Использование: python check-3-3-1.py <ёмкость, мкФ>
-# Обмен и ёмкость записываются в файл device-3-3-1.log.
+# Задание 3.3.2: возвращает строки через UART0 по внутренней петле LBE и через
+# выводы GP0 и GP1 с перемычкой, пробует неверные аргументы.
+# Перемычка GP0 — GP1 стоит весь прогон. Обмен записывается в файл device-3-3-2.log.
 
-import sys
 import time
 from datetime import datetime
 
@@ -13,24 +11,24 @@ from serial.tools import list_ports
 VENDOR_ID = 0x2E8A
 PRODUCT_ID = 0x000A
 
-TASK = "3.3.1"
+TASK = "3.3.2"
 PROJECT = "331-uart"
-LOG_NAME = "device-3-3-1.log"
+LOG_NAME = "device-3-3-2.log"
 BACKSPACE = "\x7f"
-# конденсаторы, с которыми фронты укладываются в замер задачи
-CAPACITANCE_MIN_UF = 2.2
-CAPACITANCE_MAX_UF = 10
 # Кадр команды и сколько секунд слушать ответ.
 STEPS = [
     ("\r", 0.5),
     ("help\r", 1),
     ("info\r", 1),
-    ("edge pp\r", 3),
-    ("edge od\r", 5),
-    ("edge pp\r", 3),
-    ("edge od\r", 5),
-    ("edge xx\r", 0.5),
-    ("edge\r", 0.5),
+    ("loop internal\r", 0.5),
+    ("echo ping\r", 0.5),
+    ("echo 0123456789ABCDEFGHIJKLMNOPQRSTUV\r", 0.5),
+    ("loop pins\r", 0.5),
+    ("echo ping\r", 0.5),
+    ("echo 0123456789ABCDEFGHIJKLMNOPQRSTUV\r", 0.5),
+    ("echo 0123456789ABCDEFGHIJKLMNOPQRSTUVW\r", 0.5),
+    ("echo\r", 0.5),
+    ("loop xx\r", 0.5),
 ]
 
 
@@ -67,22 +65,10 @@ def talk(board):
     return exchange
 
 
-def capacitance_uf():
-    try:
-        value = float(sys.argv[1].replace(",", "."))
-    except (IndexError, ValueError):
-        value = 0
-    if not CAPACITANCE_MIN_UF <= value <= CAPACITANCE_MAX_UF:
-        print("Укажите ёмкость конденсатора в микрофарадах, от 2,2 до 10: python check-3-3-1.py 4.7", end="\r\n")
-        sys.exit(1)
-    return value
-
-
-def write_log(board, capacitance, exchange):
+def write_log(board, exchange):
     with open(LOG_NAME, "w", encoding="utf-8") as log:
         log.write("задание: " + TASK + "\n")
         log.write("проект: " + PROJECT + "\n")
-        log.write("конденсатор, мкФ: %g\n" % capacitance)
         log.write("устройство: %04x:%04x\n" % (board.vid, board.pid))
         log.write("серийный номер: " + str(board.serial_number) + "\n")
         log.write("порт: " + board.device + "\n")
@@ -93,7 +79,6 @@ def write_log(board, capacitance, exchange):
         log.write("итог: отправлено кадров %d, принято строк %d\n" % (len(STEPS), answers))
 
 
-capacitance = capacitance_uf()
 board = find_board()
 
 if board is None:
@@ -101,5 +86,5 @@ if board is None:
 else:
     print("Плата на порту " + board.device + ", отправляю кадры", end="\r\n")
     exchange = talk(board)
-    write_log(board, capacitance, exchange)
+    write_log(board, exchange)
     print("Обмен записан в " + LOG_NAME, end="\r\n")

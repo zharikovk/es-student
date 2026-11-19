@@ -17,6 +17,7 @@ target_include_directories(platform PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(platform PRIVATE 
 	pico_stdlib
 	hardware_adc
+	hardware_uart
 	)
 add_library(logic STATIC
 	logic/api/api.c
@@ -25,6 +26,7 @@ add_library(logic STATIC
     logic/button-task/button-task.c
     logic/pi-task/pi-task.c
     logic/edge-task/edge-task.c
+    logic/uart-task/uart-task.c
 )
 target_include_directories(logic PUBLIC 
     ${CMAKE_CURRENT_SOURCE_DIR}/logic/api
@@ -32,6 +34,7 @@ target_include_directories(logic PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/logic/button-task
     ${CMAKE_CURRENT_SOURCE_DIR}/logic/pi-task
     ${CMAKE_CURRENT_SOURCE_DIR}/logic/edge-task
+    ${CMAKE_CURRENT_SOURCE_DIR}/logic/uart-task
 )
 target_link_libraries(logic PUBLIC 
     stdio-text-protocol
