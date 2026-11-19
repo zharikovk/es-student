@@ -1,10 +1,10 @@
 задание: 3.3.1
 проект: 331-uart
-конденсатор, мкФ: 4.7
+конденсатор, мкФ: 2.2
 устройство: 2e8a:000a
 серийный номер: 5054316550735B9C
 порт: /dev/ttyACM0
-начало: 2026-11-19T22:22:31
+начало: 2026-11-19T22:30:42
    0.000 --> 
    0.504 --> help
    0.505 <-- help
@@ -27,26 +27,26 @@
    1.561 <-- version: 1.0.0
    1.561 <-- project: 331-uart
    1.561 <-- repo: https://github.com/zharikovk/es-student
-   1.562 <-- board: pico
-   1.562 <-- serial: 5054316550735B9C
-   1.562 <-- chip: manufacturer 0x927, part 0x0002, revision 2
-   1.562 <-- pico-sdk: 2.3.0
+   1.561 <-- board: pico
+   1.561 <-- serial: 5054316550735B9C
+   1.561 <-- chip: manufacturer 0x927, part 0x0002, revision 2
+   1.561 <-- pico-sdk: 2.3.0
    2.517 --> edge pp
    2.567 <-- edge pp
-   2.567 <-- edge pp: rise 2.2 ms, fall 1.9 ms
-   5.535 --> edge od
-   5.585 <-- edge od
-   6.190 <-- edge od: rise 192.3 ms, fall 2.0 ms
-  10.566 --> edge pp
-  10.616 <-- edge pp
-  10.616 <-- edge pp: rise 2.2 ms, fall 1.9 ms
-  13.584 --> edge od
-  13.635 <-- edge od
-  14.239 <-- edge od: rise 192.4 ms, fall 2.1 ms
-  18.614 --> edge xx
-  18.664 <-- edge xx
-  18.664 <-- error: usage edge pp|od
-  19.117 --> edge
-  19.167 <-- edge
-  19.167 <-- error: usage edge pp|od
+   2.567 <-- edge pp: rise 2.1 ms, fall 1.8 ms
+   5.536 --> edge od
+   5.586 <-- edge od
+   6.189 <-- edge od: rise 191.2 ms, fall 2.0 ms
+  10.565 --> edge pp
+  10.615 <-- edge pp
+  10.615 <-- edge pp: rise 2.1 ms, fall 1.8 ms
+  13.583 --> edge od
+  13.634 <-- edge od
+  14.237 <-- edge od: rise 191.3 ms, fall 2.0 ms
+  18.612 --> edge xx
+  18.662 <-- edge xx
+  18.662 <-- error: usage edge pp|od
+  19.115 --> edge
+  19.166 <-- edge
+  19.166 <-- error: usage edge pp|od
 итог: отправлено кадров 9, принято строк 35
