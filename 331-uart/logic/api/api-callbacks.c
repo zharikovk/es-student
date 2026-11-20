@@ -19,6 +19,8 @@
 #include <string.h>
 
 #define ECHO_MAX_LEN 32
+#define BLOCK_SIZE 64
+static uint8_t expected_block[BLOCK_SIZE];
 
 static bool parse_u32(const char *text, uint32_t *value)
 {
@@ -490,7 +492,7 @@ static void cmd_parity(const command_t *command)
     const char *arg0 = command->argv[0]; // для UART0 (приёмник)
     const char *arg1 = command->argv[1]; // для UART1 (передатчик)
 
-    // Вызываем функции platform (убедись, что они реализованы в platform.c!)
+    
 	platform_parity_t p0 = PLATFORM_PARITY_NONE; 
     if (strcmp(arg0, "even") == 0) p0 = PLATFORM_PARITY_EVEN;
     else if (strcmp(arg0, "odd") == 0) p0 = PLATFORM_PARITY_ODD;
@@ -498,12 +500,55 @@ static void cmd_parity(const command_t *command)
     platform_parity_t p1 = PLATFORM_PARITY_NONE;
     if (strcmp(arg1, "even") == 0) p1 = PLATFORM_PARITY_EVEN;
     else if (strcmp(arg1, "odd") == 0) p1 = PLATFORM_PARITY_ODD;
-
-    // Теперь передаём правильный тип enum
     platform_uart_parity_set(PLATFORM_UART0, p0);
     platform_uart_parity_set(PLATFORM_UART1, p1);
+	printf("parity: uart0 %s, uart1 %s\n", arg0, arg1);
+}
+//////////////////////////////////////334
+static const char* current_block_mode = "poll";
 
-    printf("parity: uart0 %s, uart1 %s\n", arg0, arg1);
+static void print_block(const uint8_t *data, size_t size, uint32_t errors) 
+{
+    platform_uart_rx_irq_set(false);
+    bool match = (size > 0) && (memcmp(data, expected_block, size) == 0); 
+    printf("block %s: %zu/64 %s, ", current_block_mode, size, match ? "match" : "mismatch");
+    print_errors(errors);
+}
+
+
+static void cmd_block(const command_t *command) 
+{
+    if (command->argc != 1) 
+    {
+        printf("error: usage block irq|poll\n");
+        return;
+    }
+
+    const char *mode_str = command->argv[0];
+    bool use_irq = false;
+
+    if (strcmp(mode_str, "irq") == 0) 
+    {
+        use_irq = true;
+    } else if (strcmp(mode_str, "poll") == 0) 
+    {
+        use_irq = false;
+    } else 
+    {
+        printf("error: usage block irq|poll\n");
+        return;
+    }
+    for (size_t i = 0; i < BLOCK_SIZE; i++) 
+    {
+        expected_block[i] = (uint8_t)i;
+    }
+    current_block_mode = mode_str;
+    platform_uart_rx_irq_set(use_irq);
+    if (!uart_task_start(PLATFORM_UART1, PLATFORM_UART0, expected_block, BLOCK_SIZE, print_block)) 
+    {
+        platform_uart_rx_irq_set(false);
+        printf("error: uart is busy\n");
+    }
 }
 
 /////////////////////////////////
@@ -527,7 +572,8 @@ const api_command_t api_commands[] =
 	{"link", cmd_link , "text from UART0 to UART1 and back: link <text>"},
 	{"baud_shift", cmd_baud_shift, "shift UART1 baud rate: baud_shift <percent>" },
 	{"text", cmd_text, "32 characters from UART1 to UART0" },
-	{"parity", cmd_parity, "parity of UART0 and UART1: parity <rx> <tx>" }
+	{"parity", cmd_parity, "parity of UART0 and UART1: parity <rx> <tx>" },
+	{ "block", cmd_block, "64 bytes from UART1 to UART0: block irq|poll"}
 };
 
 const uint32_t api_command_count = sizeof(api_commands) / sizeof(api_commands[0]);

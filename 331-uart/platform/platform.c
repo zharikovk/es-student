@@ -3,6 +3,7 @@
 #include "pico/stdlib.h"    
 #include "hardware/adc.h"
 #include "hardware/uart.h"
+#include "hardware/irq.h"
 //#include <stdio.h>
 
 #define LED_PIN 25
@@ -22,10 +23,42 @@
 #define UART1_TX_PIN 8
 #define UART1_RX_PIN 9
 
-static uart_inst_t *uart_of(platform_uart_t uart)
+// принятое обработчиком прерывания: блок длиннее очереди приёма
+#define RX_BUFFER_SIZE 128
+//////////////////////////////////////////////
+static volatile uint8_t rx_buffer[RX_BUFFER_SIZE];
+static volatile uint32_t rx_count;
+
+// обработчик UART0_IRQ: забирает из очереди приёма всё, что там есть
+static void on_uart0_rx(void)
 {
-    return uart == PLATFORM_UART0 ? uart0 : uart1;
+    while (uart_is_readable(uart0))
+    {
+        uint8_t byte = uart_get_hw(uart0)->dr & 0xff;
+        if (rx_count < RX_BUFFER_SIZE)
+        {
+            rx_buffer[rx_count++] = byte;
+        }
+    }
 }
+
+void platform_uart_rx_irq_set(bool on)
+{
+    // прерывание по четырём байтам в очереди и по паузе на линии
+    if (on) 
+    {
+        hw_write_masked(&uart_get_hw(uart0)->ifls, 1 << UART_UARTIFLS_RXIFLSEL_LSB, UART_UARTIFLS_RXIFLSEL_BITS);
+        irq_set_enabled(UART0_IRQ, true);
+        uart_set_irqs_enabled(uart0, true, true); 
+    } else 
+    {
+        uart_set_irqs_enabled(uart0, false, false);
+        irq_set_enabled(UART0_IRQ, false);
+    }
+}
+
+
+
 
 void platform_uart_loop_set(bool internal)
 {
@@ -42,11 +75,18 @@ void platform_uart_loop_set(bool internal)
         hw_clear_bits(&uart_get_hw(uart0)->cr, UART_UARTCR_LBE_BITS);
     }
 }
+static uart_inst_t *uart_of(platform_uart_t uart)
+{
+    return uart == PLATFORM_UART0 ? uart0 : uart1;
+}
 
 void platform_uart_clear(platform_uart_t uart)
 {
+	if (uart == PLATFORM_UART0) 
+	{
+        rx_count = 0; 
+    }
     uart_inst_t *u = uart_of(uart);
-
     while (uart_is_readable(u))
     {
         (void)uart_get_hw(u)->dr;
@@ -79,13 +119,21 @@ size_t platform_uart_read(platform_uart_t uart, uint8_t *data, size_t size)
 {
     uart_inst_t *u = uart_of(uart);
     size_t n = 0;
-
-    while (uart_is_readable(u) && n < size)
+    if (uart == PLATFORM_UART0 && irq_is_enabled(UART0_IRQ))
     {
-        data[n++] = uart_get_hw(u)->dr & 0xff;
+   // size_t n = 0;
+    while (n < size && n < rx_count) 
+    	{
+            data[n] = rx_buffer[n]; //
+            n++;
+        }
+        return n;
+    } //else 
+    while (uart_is_readable(u) && n < size) 
+    {
+         data[n++] = uart_get_hw(u)->dr & 0xff;
     }
-
-    return n;
+        return n;
 }
 
 uint32_t platform_uart_errors(platform_uart_t uart)
@@ -190,4 +238,8 @@ void platform_init(void)
 	uart_init(uart1, UART_BAUD);
     gpio_set_function(UART1_TX_PIN, GPIO_FUNC_UART);
     gpio_set_function(UART1_RX_PIN, GPIO_FUNC_UART);
+    
+    ///////////////////////////////334
+    irq_set_exclusive_handler(UART0_IRQ, on_uart0_rx);
+    irq_set_enabled(UART0_IRQ, true);
 }
